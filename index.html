@@ -942,7 +942,7 @@
       const CALENDAR_WEEK_END = "2028-12-29";
 
       const SECTION_DEFS = [
-        { id: "opening", weeks: [18, 17] },
+        { id: "opening", weeks: [18, 17], offset: 2 },
         { id: "sixteen", weeks: [16, 15, 14, 13] },
         { id: "twelve", weeks: [12, 11, 10, 9] },
         { id: "eight", weeks: [8, 7, 6, 5] },
@@ -1286,17 +1286,18 @@
       }
 
       function visibleSections() {
-        const visibleWeeks = WEEK_NUMBERS.filter((week) => week <= state.weekCount);
-        const rows = [];
-        for (let index = 0; index < visibleWeeks.length; index += 4) {
-          const weeks = visibleWeeks.slice(index, index + 4);
-          rows.push({
-            id: `row-${index / 4}`,
-            weeks,
-            offset: 4 - weeks.length
-          });
-        }
-        return rows;
+        return SECTION_DEFS
+          .map((section) => {
+            const weeks = section.weeks.filter((week) => week <= state.weekCount);
+            if (!weeks.length) return null;
+            const firstVisibleIndex = section.weeks.indexOf(weeks[0]);
+            return {
+              ...section,
+              weeks,
+              offset: (section.offset || 0) + firstVisibleIndex
+            };
+          })
+          .filter(Boolean);
       }
 
       function layoutSectionTasks(sectionTasks) {
