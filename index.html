@@ -1110,6 +1110,10 @@
         return result;
       }
 
+      function weeksBetween(start, endStart) {
+        return Math.floor((endStart.getTime() - start.getTime()) / (86400000 * 7)) + 1;
+      }
+
       function formatMonthDay(date) {
         return `${date.getUTCMonth() + 1}.${date.getUTCDate()}`;
       }
@@ -1125,7 +1129,8 @@
       function getWeekDates(week) {
         const planStart = parseDateInput(state.planStart) || parseDateInput(DEFAULT_DATE_RANGE.start);
         const planEnd = parseDateInput(state.planEnd) || parseDateInput(DEFAULT_DATE_RANGE.end);
-        const start = addDays(planStart, (MAX_WEEK - Number(week)) * 7);
+        const planWeekCount = weeksBetween(planStart, sundayOf(planEnd));
+        const start = addDays(planStart, (planWeekCount - Number(week)) * 7);
         const naturalEnd = addDays(start, 6);
         const end = Number(week) === 1 && planEnd >= start
           ? planEnd
@@ -1198,10 +1203,6 @@
         elements.settingsEnd.innerHTML = options;
         elements.settingsStart.value = formatDateInput(start);
         elements.settingsEnd.value = formatDateInput(end);
-      }
-
-      function weeksBetween(start, endStart) {
-        return Math.floor((endStart.getTime() - start.getTime()) / (86400000 * 7)) + 1;
       }
 
       function mergeLegacyContinuation(tasks) {
@@ -1332,8 +1333,9 @@
 
         sections.forEach((section) => {
           const weeks = section.weeks.filter((week) => week <= state.weekCount);
-          const isOpening = section.id === "opening" && state.weekCount === 18;
-          const offset = isOpening ? section.offset : 0;
+          const offset = section.id === "opening"
+            ? section.offset + section.weeks.indexOf(weeks[0])
+            : 0;
           const sectionTasks = state.tasks.filter((item) => taskWeeksInSection(item, section).length > 0);
           const laneById = layoutSectionTasks(sectionTasks);
           const highestLane = sectionTasks.reduce((highest, item) => Math.max(highest, laneById.get(item.id) || 1), section.rows);
