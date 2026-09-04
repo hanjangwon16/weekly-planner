@@ -788,12 +788,28 @@
         <p class="hero-note">일정 막대를 누르면 수정하고, 양끝을 드래그하면 주차 범위를 조절할 수 있습니다.</p>
       </div>
       <div class="hero-actions" aria-label="계획표 설정">
+        <button class="ghost-button" id="go-back" type="button">뒤로가기</button>
         <label class="range-picker">
           <span>주차 범위</span>
           <select id="week-count" aria-label="주차 범위">
-            <option value="12">12주</option>
-            <option value="16">16주</option>
             <option value="18" selected>18주</option>
+            <option value="17">17주</option>
+            <option value="16">16주</option>
+            <option value="15">15주</option>
+            <option value="14">14주</option>
+            <option value="13">13주</option>
+            <option value="12">12주</option>
+            <option value="11">11주</option>
+            <option value="10">10주</option>
+            <option value="9">9주</option>
+            <option value="8">8주</option>
+            <option value="7">7주</option>
+            <option value="6">6주</option>
+            <option value="5">5주</option>
+            <option value="4">4주</option>
+            <option value="3">3주</option>
+            <option value="2">2주</option>
+            <option value="1">1주</option>
           </select>
         </label>
         <button class="ghost-button" id="date-settings" type="button">날짜 설정</button>
@@ -892,7 +908,7 @@
             <select id="plan-end-input" name="planEndWeek" required></select>
           </div>
         </div>
-        <p class="settings-help">모든 주는 일요일에 시작해 토요일에 끝납니다. 시작 주와 종료 주를 선택하면 날짜가 자동으로 계산됩니다.</p>
+        <p class="settings-help">모든 주는 일요일에 시작해 토요일에 끝납니다. 시작 주와 종료 주를 선택하면 날짜와 주차 보기가 자동으로 계산됩니다. 최대 18주까지 설정할 수 있습니다.</p>
         <p class="range-preview" id="settings-preview" aria-live="polite"></p>
         <p class="editor-error" id="settings-error" hidden></p>
         <div class="editor-actions">
@@ -1037,11 +1053,12 @@
       ];
 
       const STORAGE_KEY = "radical-weekly-plan-v1";
-      const RANGE_OPTIONS = [12, 16, 18];
+      const RANGE_OPTIONS = WEEK_NUMBERS;
       const elements = {
         timeline: document.getElementById("timeline"),
         weekCount: document.getElementById("week-count"),
         rangeSummary: document.getElementById("range-summary"),
+        goBack: document.getElementById("go-back"),
         addTask: document.getElementById("add-task"),
         dateSettings: document.getElementById("date-settings"),
         downloadJpg: document.getElementById("download-jpg"),
@@ -1179,6 +1196,10 @@
         elements.settingsEnd.innerHTML = options;
         elements.settingsStart.value = formatDateInput(start);
         elements.settingsEnd.value = formatDateInput(end);
+      }
+
+      function weeksBetween(start, endStart) {
+        return Math.floor((endStart.getTime() - start.getTime()) / (86400000 * 7)) + 1;
       }
 
       function mergeLegacyContinuation(tasks) {
@@ -1446,7 +1467,7 @@
           return;
         }
         const end = addDays(endStart, 6);
-        const weeks = Math.floor((endStart.getTime() - start.getTime()) / (86400000 * 7)) + 1;
+        const weeks = weeksBetween(start, endStart);
         elements.settingsPreview.textContent = `${formatMonthDay(start)} ~ ${formatMonthDay(end)} · 총 ${weeks}주 · 일요일~토요일`;
       }
 
@@ -1858,6 +1879,14 @@
         showToast(`${value}주 보기로 변경했습니다.`);
       });
 
+      elements.goBack.addEventListener("click", () => {
+        if (window.history.length > 1) {
+          window.history.back();
+          return;
+        }
+        showToast("이전 페이지가 없습니다.");
+      });
+
       elements.addTask.addEventListener("click", () => openEditor(null));
       elements.dateSettings.addEventListener("click", openSettings);
       elements.downloadJpg.addEventListener("click", downloadBoard);
@@ -1892,12 +1921,18 @@
           setSettingsError("종료 주는 시작 주보다 빠를 수 없습니다.");
           return;
         }
+        const weeks = weeksBetween(start, endStart);
+        if (!RANGE_OPTIONS.includes(weeks)) {
+          setSettingsError(`날짜 범위는 1주부터 ${MAX_WEEK}주까지 설정할 수 있습니다.`);
+          return;
+        }
         state.planStart = formatDateInput(start);
         state.planEnd = formatDateInput(addDays(endStart, 6));
+        state.weekCount = weeks;
         saveState();
         renderBoard();
         closeSettings();
-        showToast("전체 날짜 범위를 저장했습니다.");
+        showToast(`전체 날짜 범위와 ${weeks}주 보기를 저장했습니다.`);
       });
 
       document.addEventListener("keydown", (event) => {
