@@ -1,0 +1,1965 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f4f0">
+  <title>RADICAL 주간 계획표</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <style>
+    :root {
+      color-scheme: light;
+      --canvas: #f6f5f1;
+      --paper: #ffffff;
+      --ink: #303238;
+      --muted: #787b83;
+      --line: #53565a;
+      --soft-line: #d7d7d3;
+      --header: #eeece4;
+      --blue: #b9c8db;
+      --blue-ink: #536f8f;
+      --orange: #e8c19b;
+      --orange-ink: #946a43;
+      --yellow: #f4df8b;
+      --yellow-ink: #9d8414;
+      --lilac: #e0cce9;
+      --lilac-ink: #80559b;
+      --rose: #f7e5e8;
+      --rose-ink: #a47a82;
+      --gray: #dedee2;
+      --gray-ink: #77787d;
+      --green: #cfe2d8;
+      --green-ink: #388462;
+      --indigo: #cdd2ee;
+      --indigo-ink: #68719f;
+      --shadow: 0 18px 60px rgba(43, 45, 51, .08);
+      font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { background: var(--canvas); }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(255, 255, 255, .9), transparent 33rem),
+        var(--canvas);
+      font-size: 14px;
+    }
+
+    button,
+    input,
+    select,
+    textarea { font: inherit; }
+
+    button { cursor: pointer; }
+
+    body.is-resizing,
+    body.is-resizing * { cursor: ew-resize !important; }
+
+    body.is-resizing * {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 76px 0 56px;
+    }
+
+    .hero {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 32px;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      color: #3c3e43;
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800;
+      letter-spacing: -.075em;
+      line-height: 1;
+    }
+
+    h1 strong {
+      font-weight: 900;
+      letter-spacing: -.06em;
+    }
+
+    .hero-copy {
+      min-width: 0;
+    }
+
+    .hero-note {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 9px;
+    }
+
+    .range-picker {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 42px;
+      padding: 5px 8px 5px 13px;
+      border: 1px solid #dddcd6;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .78);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 5px 20px rgba(43, 45, 51, .035);
+    }
+
+    .range-picker select {
+      min-height: 30px;
+      padding: 0 26px 0 10px;
+      border: 0;
+      border-radius: 999px;
+      outline: 0;
+      background: #3e4148;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .action-button,
+    .primary-button,
+    .ghost-button,
+    .danger-button {
+      min-height: 42px;
+      border-radius: 999px;
+      padding: 0 16px;
+      border: 1px solid transparent;
+      font-size: 12px;
+      font-weight: 800;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .action-button:hover,
+    .primary-button:hover,
+    .ghost-button:hover,
+    .danger-button:hover { transform: translateY(-1px); }
+
+    .action-button,
+    .primary-button {
+      background: #3d4047;
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(61, 64, 71, .16);
+    }
+
+    .ghost-button {
+      border-color: #d8d8d2;
+      background: rgba(255, 255, 255, .72);
+      color: #5a5c63;
+    }
+
+    .danger-button {
+      border-color: #eccaca;
+      background: #fff5f5;
+      color: #a64141;
+    }
+
+    .board-card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .board-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 43px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--soft-line);
+      background: rgba(255, 255, 255, .92);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .board-meta strong { color: #4b4d53; }
+
+    .board-meta-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .board-meta-hint::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #8b8e95;
+    }
+
+    .board-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+    }
+
+    .timeline {
+      min-width: 980px;
+      background: #fff;
+    }
+
+    .timeline-section {
+      position: relative;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .timeline-section:last-child { border-bottom: 0; }
+
+    .week-heading,
+    .section-body {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .week-heading {
+      min-height: 38px;
+      border-bottom: 1px solid var(--line);
+      background: var(--header);
+    }
+
+    .week-cell,
+    .week-spacer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-width: 0;
+      padding: 7px 8px;
+      border-right: 1px solid var(--line);
+      color: #414247;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: -.04em;
+      line-height: 1.15;
+      white-space: nowrap;
+    }
+
+    .week-cell { padding-right: 34px; }
+
+    .week-cell:last-child,
+    .week-spacer:last-child { border-right: 0; }
+
+    .week-add {
+      position: absolute;
+      top: 6px;
+      right: 7px;
+      display: grid;
+      width: 22px;
+      height: 22px;
+      place-items: center;
+      padding: 0;
+      border: 1px solid rgba(64, 66, 71, .22);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .5);
+      color: #66686d;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1;
+      opacity: .72;
+      transition: background .18s ease, border-color .18s ease, color .18s ease, opacity .18s ease, transform .18s ease;
+    }
+
+    .week-add:hover,
+    .week-add:focus-visible {
+      border-color: #3d4047;
+      outline: 0;
+      background: #3d4047;
+      color: #fff;
+      opacity: 1;
+      transform: scale(1.04);
+    }
+
+    .section-body {
+      position: relative;
+      grid-template-rows: repeat(var(--rows), minmax(31px, auto));
+      min-height: calc(var(--rows) * 31px);
+      background-color: #fff;
+    }
+
+    .section-body::before {
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      background-image: linear-gradient(
+        to right,
+        transparent 0,
+        transparent calc(25% - .5px),
+        var(--line) calc(25% - .5px),
+        var(--line) calc(25% + .5px),
+        transparent calc(25% + .5px),
+        transparent calc(50% - .5px),
+        var(--line) calc(50% - .5px),
+        var(--line) calc(50% + .5px),
+        transparent calc(50% + .5px),
+        transparent calc(75% - .5px),
+        var(--line) calc(75% - .5px),
+        var(--line) calc(75% + .5px),
+        transparent calc(75% + .5px)
+      );
+      content: "";
+      pointer-events: none;
+    }
+
+    .task-bar {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      align-self: stretch;
+      min-width: 0;
+      margin: 3px 4px;
+      padding: 6px 9px 6px 13px;
+      overflow: hidden;
+      border: 0;
+      border-radius: 5px;
+      color: #45464b;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: -.045em;
+      line-height: 1.3;
+      text-align: left;
+      white-space: pre-line;
+      overflow-wrap: anywhere;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14);
+      transition: transform .16s ease, filter .16s ease, box-shadow .16s ease;
+    }
+
+    .task-bar::before {
+      position: absolute;
+      top: 7px;
+      bottom: 7px;
+      left: 8px;
+      width: 3px;
+      border-radius: 4px;
+      background: currentColor;
+      content: "";
+      opacity: .95;
+    }
+
+    .task-bar:hover,
+    .task-bar:focus-visible {
+      z-index: 3;
+      outline: 0;
+      filter: saturate(1.06) brightness(.99);
+      box-shadow: 0 4px 12px rgba(50, 52, 57, .13), inset 0 0 0 1px rgba(255, 255, 255, .2);
+      transform: translateY(-1px);
+    }
+
+    .task-bar:focus-visible { box-shadow: 0 0 0 3px rgba(61, 64, 71, .22); }
+
+    .task-bar.is-dragging {
+      z-index: 5;
+      box-shadow: 0 0 0 3px rgba(61, 64, 71, .18), 0 6px 16px rgba(50, 52, 57, .14);
+    }
+
+    .resize-handle {
+      position: absolute;
+      z-index: 4;
+      top: 0;
+      bottom: 0;
+      width: 13px;
+      padding: 0;
+      border: 0;
+      background: rgba(255, 255, 255, .16);
+      cursor: ew-resize;
+      opacity: .9;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      transition: opacity .16s ease, background .16s ease;
+    }
+
+    .resize-handle-start { left: 0; }
+    .resize-handle-end { right: 0; }
+
+    .task-bar:hover .resize-handle,
+    .task-bar:focus-visible .resize-handle,
+    .task-bar.is-dragging .resize-handle { opacity: 1; }
+
+    .resize-handle:hover { background: rgba(61, 64, 71, .08); }
+
+    .resize-handle::after {
+      position: absolute;
+      top: 7px;
+      bottom: 7px;
+      left: 6px;
+      width: 2px;
+      border-radius: 2px;
+      background: currentColor;
+      content: "";
+      opacity: .82;
+      box-shadow: 4px 0 0 currentColor;
+    }
+
+    .task-bar.is-continuation .task-title {
+      color: rgba(63, 65, 70, .53);
+      font-weight: 600;
+    }
+
+    .task-bar.is-continuation::before { opacity: .42; }
+
+    .task-bar.continuation-from-previous {
+      margin-left: 0;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+
+    .task-bar.continuation-to-next {
+      margin-right: 0;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .tone-blue { background: var(--blue); color: var(--blue-ink); }
+    .tone-orange { background: var(--orange); color: var(--orange-ink); }
+    .tone-yellow { background: var(--yellow); color: var(--yellow-ink); }
+    .tone-lilac { background: var(--lilac); color: var(--lilac-ink); }
+    .tone-rose { background: var(--rose); color: var(--rose-ink); }
+    .tone-gray { background: var(--gray); color: var(--gray-ink); }
+    .tone-green { background: var(--green); color: var(--green-ink); }
+    .tone-indigo { background: var(--indigo); color: var(--indigo-ink); }
+
+    .task-title {
+      display: block;
+      min-width: 0;
+      color: #3f4146;
+    }
+
+    .duration-legend {
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 5px;
+      color: #787b83;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .duration-legend-label { margin-right: 1px; }
+
+    .duration-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .legend-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 3px;
+    }
+
+    .tone-auto-preview {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 43px;
+      padding: 0 12px;
+      border: 1px solid #d9dad6;
+      border-radius: 9px;
+      background: #fbfbfa;
+      color: #55575d;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tone-swatch {
+      width: 17px;
+      height: 17px;
+      flex: 0 0 auto;
+      border: 1px solid rgba(64, 66, 71, .1);
+      border-radius: 5px;
+    }
+
+    .board-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 2px 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .board-footer p { margin: 0; }
+
+    .modal-layer[hidden],
+    [hidden] { display: none !important; }
+
+    .modal-layer {
+      position: fixed;
+      z-index: 10;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(35, 37, 42, .42);
+      backdrop-filter: blur(4px);
+    }
+
+    .editor {
+      width: min(100%, 520px);
+      max-height: min(720px, calc(100vh - 40px));
+      overflow: auto;
+      border: 1px solid rgba(255, 255, 255, .65);
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 24px 80px rgba(25, 27, 32, .25);
+    }
+
+    .editor-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 24px 24px 15px;
+      border-bottom: 1px solid #ecece8;
+    }
+
+    .editor-kicker {
+      margin: 0 0 5px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .editor h2 {
+      margin: 0;
+      color: #383a40;
+      font-size: 21px;
+      letter-spacing: -.065em;
+    }
+
+    .close-button {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      flex: 0 0 auto;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      background: #f0f0ed;
+      color: #66686e;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .editor-form { padding: 21px 24px 24px; }
+
+    .field { margin-bottom: 17px; }
+
+    .field label,
+    .field legend {
+      display: block;
+      margin-bottom: 7px;
+      color: #55575d;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .field textarea,
+    .field input,
+    .field select {
+      width: 100%;
+      min-height: 43px;
+      border: 1px solid #d9dad6;
+      border-radius: 9px;
+      outline: 0;
+      background: #fbfbfa;
+      color: #36383d;
+      font-size: 13px;
+      transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .field textarea {
+      min-height: 94px;
+      padding: 11px 12px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .field input,
+    .field select { padding: 0 12px; }
+
+    .field textarea:focus,
+    .field input:focus,
+    .field select:focus {
+      border-color: #8f929a;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(86, 89, 97, .11);
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .range-preview {
+      margin: -3px 0 18px;
+      padding: 10px 12px;
+      border-radius: 9px;
+      background: #f5f5f2;
+      color: #71737a;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .settings-help {
+      margin: -3px 0 18px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .editor-error {
+      margin: -2px 0 14px;
+      color: #ae4545;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .editor-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .editor-actions-right {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .editor-actions .ghost-button,
+    .editor-actions .primary-button,
+    .editor-actions .danger-button { min-height: 40px; }
+
+    .toast {
+      position: fixed;
+      z-index: 20;
+      right: 22px;
+      bottom: 22px;
+      max-width: min(360px, calc(100vw - 44px));
+      padding: 11px 14px;
+      border: 1px solid rgba(255, 255, 255, .7);
+      border-radius: 10px;
+      background: #3d4047;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 12px 28px rgba(40, 42, 48, .2);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .toast.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 760px) {
+      body { overflow-x: hidden; }
+
+      .page {
+        width: min(100% - 24px, 1180px);
+        padding-top: 38px;
+      }
+
+      .hero,
+      .hero-copy,
+      .hero-actions {
+        min-width: 0;
+      }
+
+      .hero {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .hero-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .hero-note {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+      }
+
+      .timeline { min-width: 720px; }
+
+      .week-cell,
+      .week-spacer {
+        font-size: 11px;
+      }
+
+      .task-bar {
+        font-size: 11px;
+        line-height: 1.28;
+      }
+
+      .resize-handle {
+        width: 24px;
+      }
+
+      .resize-handle::after {
+        left: 10px;
+        width: 3px;
+      }
+
+      .board-meta {
+        align-items: flex-start;
+        flex-direction: column;
+        justify-content: center;
+        gap: 4px;
+        padding: 9px 12px;
+      }
+
+      .board-footer { flex-direction: column; }
+    }
+
+    @media (max-width: 480px) {
+      .range-picker { flex: 1 1 100%; justify-content: space-between; }
+      .action-button { flex: 1 1 auto; }
+      .timeline { min-width: 640px; }
+      .field-grid { grid-template-columns: 1fr; gap: 0; }
+      .editor-header,
+      .editor-form { padding-left: 18px; padding-right: 18px; }
+      .editor-actions { align-items: stretch; flex-direction: column-reverse; }
+      .editor-actions-right { width: 100%; }
+      .editor-actions-right > * { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Project timeline · click to edit</p>
+        <h1><strong>RADICAL</strong> 주간 계획표</h1>
+        <p class="hero-note">일정 막대를 누르면 수정하고, 양끝을 드래그하면 주차 범위를 조절할 수 있습니다.</p>
+      </div>
+      <div class="hero-actions" aria-label="계획표 설정">
+        <label class="range-picker">
+          <span>주차 범위</span>
+          <select id="week-count" aria-label="주차 범위">
+            <option value="12">12주</option>
+            <option value="16">16주</option>
+            <option value="18" selected>18주</option>
+          </select>
+        </label>
+        <button class="ghost-button" id="date-settings" type="button">날짜 설정</button>
+        <button class="ghost-button" id="download-jpg" type="button">전체 다운로드 · JPG</button>
+        <button class="action-button" id="add-task" type="button">+ 할 일 추가</button>
+      </div>
+    </header>
+
+    <section class="board-card" aria-label="RADICAL 주간 계획표">
+      <div class="board-meta">
+        <span id="range-summary"><strong>18주 보기</strong> · 18주부터 1주까지</span>
+        <span class="duration-legend" aria-label="기간별 색상">
+          <span class="duration-legend-label">기간 색상</span>
+          <span class="duration-legend-item"><i class="legend-dot tone-rose"></i>1주</span>
+          <span class="duration-legend-item"><i class="legend-dot tone-orange"></i>2주</span>
+          <span class="duration-legend-item"><i class="legend-dot tone-yellow"></i>3주</span>
+          <span class="duration-legend-item"><i class="legend-dot tone-green"></i>4주</span>
+          <span class="duration-legend-item"><i class="legend-dot tone-blue"></i>5주</span>
+          <span class="duration-legend-item"><i class="legend-dot tone-indigo"></i>6주</span>
+          <span class="duration-legend-item"><i class="legend-dot tone-lilac"></i>7주+</span>
+        </span>
+        <span class="board-meta-hint">이어지는 일정은 연하게 표시 · 겹치면 자동으로 다음 줄에 배치</span>
+      </div>
+      <div class="board-scroll">
+        <div class="timeline" id="timeline"></div>
+      </div>
+    </section>
+
+    <div class="board-footer">
+      <p>주차 수를 줄이면 해당 주차 밖의 일정은 숨겨지고, 저장한 일정은 그대로 유지됩니다.</p>
+      <p>브라우저에 변경 사항 자동 저장</p>
+    </div>
+  </main>
+
+  <div class="modal-layer" id="editor-layer" hidden>
+    <section class="editor" role="dialog" aria-modal="true" aria-labelledby="editor-title">
+      <header class="editor-header">
+        <div>
+          <p class="editor-kicker">Task editor</p>
+          <h2 id="editor-title">할 일 수정</h2>
+        </div>
+        <button class="close-button" id="close-editor" type="button" aria-label="닫기">×</button>
+      </header>
+      <form class="editor-form" id="editor-form">
+        <div class="field">
+          <label for="task-title-input">할 일</label>
+          <textarea id="task-title-input" name="title" required placeholder="할 일을 입력하세요"></textarea>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="task-start-input">시작 주차</label>
+            <select id="task-start-input" name="start" required></select>
+          </div>
+          <div class="field">
+            <label for="task-end-input">종료 주차</label>
+            <select id="task-end-input" name="end" required></select>
+          </div>
+        </div>
+        <p class="range-preview" id="range-preview" aria-live="polite"></p>
+        <div class="field">
+          <label for="tone-auto-preview">기간별 자동 색상</label>
+          <div class="tone-auto-preview" id="tone-auto-preview">
+            <span class="tone-swatch" id="tone-swatch" aria-hidden="true"></span>
+            <span id="tone-auto-label"></span>
+          </div>
+        </div>
+        <p class="editor-error" id="editor-error" hidden></p>
+        <div class="editor-actions">
+          <button class="danger-button" id="delete-task" type="button">삭제</button>
+          <div class="editor-actions-right">
+            <button class="ghost-button" id="cancel-editor" type="button">취소</button>
+            <button class="primary-button" type="submit">저장</button>
+          </div>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-layer" id="settings-layer" hidden>
+    <section class="editor" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <header class="editor-header">
+        <div>
+          <p class="editor-kicker">Schedule settings</p>
+          <h2 id="settings-title">전체 주차 범위 설정</h2>
+        </div>
+        <button class="close-button" id="close-settings" type="button" aria-label="닫기">×</button>
+      </header>
+      <form class="editor-form" id="settings-form">
+        <div class="field-grid">
+          <div class="field">
+            <label for="plan-start-input">시작 주</label>
+            <select id="plan-start-input" name="planStartWeek" required></select>
+          </div>
+          <div class="field">
+            <label for="plan-end-input">종료 주</label>
+            <select id="plan-end-input" name="planEndWeek" required></select>
+          </div>
+        </div>
+        <p class="settings-help">모든 주는 일요일에 시작해 토요일에 끝납니다. 시작 주와 종료 주를 선택하면 날짜가 자동으로 계산됩니다.</p>
+        <p class="range-preview" id="settings-preview" aria-live="polite"></p>
+        <p class="editor-error" id="settings-error" hidden></p>
+        <div class="editor-actions">
+          <span></span>
+          <div class="editor-actions-right">
+            <button class="ghost-button" id="cancel-settings" type="button">취소</button>
+            <button class="primary-button" type="submit">주차 저장</button>
+          </div>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const MAX_WEEK = 18;
+      const WEEK_NUMBERS = Array.from({ length: MAX_WEEK }, (_, index) => MAX_WEEK - index);
+      const DURATION_TONES = ["rose", "orange", "yellow", "green", "blue", "indigo", "lilac"];
+      const TONE_LABELS = {
+        rose: "연분홍",
+        orange: "주황",
+        yellow: "노랑",
+        green: "초록",
+        blue: "파랑",
+        indigo: "남색",
+        lilac: "보라"
+      };
+      const DEFAULT_DATE_RANGE = {
+        start: "2026-03-29",
+        end: "2026-08-01"
+      };
+      const CALENDAR_WEEK_START = "2025-01-05";
+      const CALENDAR_WEEK_END = "2028-12-29";
+
+      const SECTION_DEFS = [
+        { id: "opening", weeks: [18, 17], offset: 2, rows: 3 },
+        { id: "sixteen", weeks: [16, 15, 14, 13], offset: 0, rows: 9 },
+        { id: "twelve", weeks: [12, 11, 10, 9], offset: 0, rows: 10 },
+        { id: "eight", weeks: [8, 7, 6, 5], offset: 0, rows: 15 },
+        { id: "four", weeks: [4, 3, 2, 1], offset: 0, rows: 7 }
+      ];
+
+      const task = (id, section, lane, start, end, tone, title) => ({
+        id,
+        section,
+        lane,
+        start,
+        end,
+        tone,
+        title
+      });
+
+      const DEFAULT_TASKS = [
+        task("opening-program", "opening", 1, 18, 15, "blue", "프로그램 이름 및 개요 (리플렛) 구상 시작, 타임테이블 (리플렛) 작성 시작"),
+        task("opening-overview", "opening", 2, 18, 17, "orange", "래디컬 개요 구상"),
+        task("opening-theme", "opening", 3, 18, 17, "gray", "래디컬 주제 확정"),
+
+        task("sixteen-overview", "sixteen", 2, 16, 16, "orange", "래디컬 개요 구상"),
+        task("sixteen-song", "sixteen", 2, 14, 13, "lilac", "송리스트"),
+        task("sixteen-theme", "sixteen", 3, 16, 16, "gray", "래디컬 주제 확정"),
+        task("sixteen-team-notice", "sixteen", 3, 15, 14, "rose", "프로그램팀 선발 공지"),
+        task("sixteen-poster-owner", "sixteen", 3, 13, 13, "rose", "간이 포스터 담당자 선정 및 제작 의뢰"),
+        task("sixteen-manual", "sixteen", 4, 14, 14, "gray", "접수 매뉴얼 마감"),
+        task("sixteen-poster-design", "sixteen", 5, 14, 14, "gray", "포스터 디자인 의뢰 및 확정/게시\n(Slave/선교동역자/참가교회 문자, 밴드, SNS)"),
+        task("sixteen-receipt", "sixteen", 6, 14, 14, "gray", "접수 일정 공지"),
+        task("sixteen-print", "sixteen", 7, 14, 14, "gray", "포스터 인쇄"),
+        task("sixteen-testimonial", "sixteen", 8, 14, 14, "gray", "추천사(리플렛) 요청"),
+        task("sixteen-theme-delivery", "sixteen", 9, 14, 14, "gray", "주제, 부제 선정 및 배경 전달(예배팀)"),
+
+        task("twelve-program", "twelve", 1, 12, 12, "blue", "프로그램, 타임테이블"),
+        task("twelve-simple-poster", "twelve", 1, 11, 10, "orange", "간이포스터 게시"),
+        task("twelve-badge-design", "twelve", 1, 9, 9, "gray", "명찰 디자인 의뢰"),
+        task("twelve-song", "twelve", 2, 12, 9, "lilac", "송리스트"),
+        task("twelve-poster-owner", "twelve", 3, 12, 11, "rose", "간이 포스터 담당자 선정 및 제작 의뢰"),
+        task("twelve-invitation", "twelve", 4, 12, 11, "rose", "초대의 글 (리플렛) 요청"),
+        task("twelve-manual", "twelve", 5, 12, 9, "blue", "매뉴얼/세부일정 작성"),
+        task("twelve-team-meeting", "twelve", 6, 12, 12, "gray", "프로그램팀 모임 시작"),
+        task("twelve-helper-invite", "twelve", 6, 11, 11, "gray", "헬퍼 초대장 제작 및 인쇄"),
+        task("twelve-worship-notice", "twelve", 7, 12, 12, "gray", "래디컬 워십 횟수/시간 공지\n설교 횟수/시간 공지"),
+        task("twelve-leaflet", "twelve", 8, 12, 11, "rose", "리플렛 디자인 의뢰, 확정, 게시(Slave/선교동역자/참가교회 문자, 밴드, SNS)"),
+        task("twelve-live-material", "twelve", 3, 9, 9, "gray", "라이브 자료 준비"),
+        task("twelve-live-host", "twelve", 4, 9, 9, "gray", "라이브 진행자/카메라/음향 섭외"),
+        task("twelve-live-thumbnail", "twelve", 5, 9, 9, "gray", "라이브 썸네일/인스타 게시물 제작 의뢰"),
+        task("twelve-broadcast", "twelve", 6, 9, 9, "gray", "래디컬 극동방송 광고 시작"),
+        task("twelve-attendance", "twelve", 7, 9, 9, "gray", "1차 슬레이브 참석현황 파악\n+ 회비 납부 공지"),
+        task("twelve-radical-notice", "twelve", 8, 9, 9, "rose", "래디컬 안내사항 작성"),
+        task("twelve-registration", "twelve", 9, 9, 9, "gray", "접수 시작/래디컬 준비과정 게시(월수금)"),
+        task("twelve-fee", "twelve", 10, 9, 9, "green", "슬레이브 래디컬 회비 납부/마감"),
+
+        task("eight-song", "eight", 1, 8, 7, "lilac", "송리스트"),
+        task("eight-youtube", "eight", 1, 5, 5, "gray", "유튜브 라이브 (정보 전달)"),
+        task("eight-manual", "eight", 2, 8, 5, "blue", "매뉴얼/세부일정 작성"),
+        task("eight-poster-mail", "eight", 3, 8, 8, "gray", "포스터 우편작업 및 발송"),
+        task("eight-ot-request", "eight", 3, 7, 5, "yellow", "프로그램, 메신져, 예배팀 래디컬 오티 피피티/기획안/큐시트 요청"),
+        task("eight-helper-recruit", "eight", 4, 8, 7, "rose", "헬퍼 모집 (SNS 초대장 게시)"),
+        task("eight-main-ppt", "eight", 4, 7, 5, "yellow", "메인 피피티, 래디컬 광고 피피티 제작 요청"),
+        task("eight-helper-prayer", "eight", 5, 7, 7, "gray", "헬퍼 기도모임/OT참석 및 차량 파악"),
+        task("eight-demo", "eight", 5, 6, 5, "orange", "프로그램 시연영상 요청"),
+        task("eight-preset-list", "eight", 5, 6, 5, "orange", "사전세팅 리스트 구상"),
+        task("eight-radical-prayer", "eight", 6, 7, 5, "orange", "래디컬 기도모임 및 OT (담당자, 방식, 설교자, PPT) 회의 시작"),
+        task("eight-challenge-idea", "eight", 7, 8, 5, "orange", "30챌린지 구상"),
+        task("eight-helper-chat", "eight", 8, 7, 7, "gray", "헬퍼 톡방 초대"),
+        task("eight-team-prayer", "eight", 8, 6, 5, "rose", "팀별 기도모임 기도제목 요청"),
+        task("eight-participant-notice", "eight", 9, 7, 7, "gray", "참가명단 양식, 인근 편의시설, 래디컬 안내사항 발송/주요 안내사항 문자 발송(침구류,야식, 부분 참석비)"),
+        task("eight-banner", "eight", 9, 6, 5, "rose", "현수막 디자인 의뢰"),
+        task("eight-worship-lineup", "eight", 10, 6, 6, "gray", "예배팀 라인업 요청"),
+        task("eight-live-message", "eight", 10, 5, 5, "gray", "라이브 문자 발송 (슬레이브, 선교동역자)"),
+        task("eight-sermon-ppt", "eight", 11, 6, 6, "gray", "설교 피피티 템플릿 선정 및 전달"),
+        task("eight-slave-fee-message", "eight", 11, 5, 5, "gray", "슬레이브 회비 납부 문자"),
+        task("eight-attendance", "eight", 12, 6, 6, "gray", "2차 슬레이브 참석현황 파악"),
+        task("eight-prayer-ad", "eight", 12, 5, 5, "gray", "래디컬 기도모임/OT\n정기예배 광고 및 문자 공지"),
+        task("eight-supplies", "eight", 13, 6, 6, "gray", "1차 래디컬, 프로그램 물품 체크 및 주문"),
+        task("eight-site-visit", "eight", 13, 5, 5, "gray", "최종 답사"),
+        task("eight-radical-notice", "eight", 14, 8, 7, "rose", "래디컬 안내사항 작성"),
+        task("eight-fee", "eight", 15, 8, 5, "green", "슬레이브 래디컬 회비 납부/마감"),
+
+        task("four-program-request", "four", 1, 4, 4, "yellow", "프로그램, 메신져, 예배팀 요청"),
+        task("four-badge", "four", 1, 3, 3, "gray", "2차 명찰 작업"),
+        task("four-room", "four", 1, 2, 2, "gray", "방배정"),
+        task("four-prayer-manual", "four", 1, 1, 1, "gray", "기도모임/OT (매뉴얼, 세부일정)\n및 영상 SNS 게시"),
+        task("four-main-ppt", "four", 2, 4, 4, "yellow", "메인 피피티 제작 요청"),
+        task("four-bracelet", "four", 2, 3, 3, "gray", "팔찌 제작"),
+        task("four-print", "four", 2, 2, 2, "gray", "인쇄물 작업"),
+        task("four-preset-role", "four", 2, 1, 1, "gray", "사전세팅 역할 분담 및 담당자 확정 및 톡방 공유"),
+        task("four-demo", "four", 3, 4, 4, "orange", "프로그램 시연영상 요청"),
+        task("four-attendance-final", "four", 3, 3, 3, "gray", "슬레이브 참석현황 최종 파악"),
+        task("four-helper-preset", "four", 3, 2, 2, "gray", "헬퍼 사전세팅/당일 참여 및 차량 파악"),
+        task("four-radical-chat", "four", 3, 1, 1, "gray", "래디컬 톡방(슬레이브, 헬퍼) 만들기"),
+        task("four-preset-list", "four", 4, 4, 4, "orange", "사전세팅 리스트 구상"),
+        task("four-planning-prayer", "four", 4, 3, 3, "gray", "기획팀 기도모임"),
+        task("four-helper-share", "four", 4, 2, 2, "gray", "사전세팅 종료 후 전달사항 준비\n및 래디컬 톡방 공유"),
+        task("four-people-cars", "four", 4, 1, 1, "gray", "사전세팅 인원 및 차량 파악"),
+        task("four-needs", "four", 5, 4, 4, "gray", "2차 필요물품 체크 및 주문"),
+        task("four-prayer-video", "four", 5, 2, 2, "gray", "기도모임/OT (프로그램, 메신져, 예배팀) 및 영상 SNS 게시"),
+        task("four-dinner", "four", 5, 1, 1, "gray", "사전세팅 저녁 준비"),
+        task("four-qr", "four", 6, 2, 2, "gray", "QR 코드 오픈채팅방 만들기"),
+        task("four-challenge-start", "four", 7, 4, 1, "orange", "30챌린지 시작 및 SNS 게시")
+      ];
+
+      const STORAGE_KEY = "radical-weekly-plan-v1";
+      const RANGE_OPTIONS = [12, 16, 18];
+      const elements = {
+        timeline: document.getElementById("timeline"),
+        weekCount: document.getElementById("week-count"),
+        rangeSummary: document.getElementById("range-summary"),
+        addTask: document.getElementById("add-task"),
+        dateSettings: document.getElementById("date-settings"),
+        downloadJpg: document.getElementById("download-jpg"),
+        layer: document.getElementById("editor-layer"),
+        form: document.getElementById("editor-form"),
+        editorTitle: document.getElementById("editor-title"),
+        titleInput: document.getElementById("task-title-input"),
+        startInput: document.getElementById("task-start-input"),
+        endInput: document.getElementById("task-end-input"),
+        rangePreview: document.getElementById("range-preview"),
+        toneAutoPreview: document.getElementById("tone-auto-preview"),
+        toneSwatch: document.getElementById("tone-swatch"),
+        toneAutoLabel: document.getElementById("tone-auto-label"),
+        error: document.getElementById("editor-error"),
+        closeEditor: document.getElementById("close-editor"),
+        cancelEditor: document.getElementById("cancel-editor"),
+        deleteTask: document.getElementById("delete-task"),
+        toast: document.getElementById("toast"),
+        settingsLayer: document.getElementById("settings-layer"),
+        settingsForm: document.getElementById("settings-form"),
+        settingsStart: document.getElementById("plan-start-input"),
+        settingsEnd: document.getElementById("plan-end-input"),
+        settingsPreview: document.getElementById("settings-preview"),
+        settingsError: document.getElementById("settings-error"),
+        closeSettings: document.getElementById("close-settings"),
+        cancelSettings: document.getElementById("cancel-settings")
+      };
+
+      const cloneTasks = (tasks) => tasks.map((item) => ({ ...item }));
+
+      function parseDateInput(value) {
+        if (typeof value !== "string") return null;
+        const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+        if (!match) return null;
+        const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+        if (
+          date.getUTCFullYear() !== Number(match[1]) ||
+          date.getUTCMonth() !== Number(match[2]) - 1 ||
+          date.getUTCDate() !== Number(match[3])
+        ) return null;
+        return date;
+      }
+
+      function addDays(date, days) {
+        const result = new Date(date.getTime());
+        result.setUTCDate(result.getUTCDate() + days);
+        return result;
+      }
+
+      function formatMonthDay(date) {
+        return `${date.getUTCMonth() + 1}.${date.getUTCDate()}`;
+      }
+
+      function formatDateInput(date) {
+        return [
+          date.getUTCFullYear(),
+          String(date.getUTCMonth() + 1).padStart(2, "0"),
+          String(date.getUTCDate()).padStart(2, "0")
+        ].join("-");
+      }
+
+      function getWeekDates(week) {
+        const planStart = parseDateInput(state.planStart) || parseDateInput(DEFAULT_DATE_RANGE.start);
+        const planEnd = parseDateInput(state.planEnd) || parseDateInput(DEFAULT_DATE_RANGE.end);
+        const start = addDays(planStart, (MAX_WEEK - Number(week)) * 7);
+        const naturalEnd = addDays(start, 6);
+        const end = Number(week) === 1 && planEnd >= start
+          ? planEnd
+          : planEnd >= start && planEnd < naturalEnd
+            ? planEnd
+            : naturalEnd;
+        return { start, end };
+      }
+
+      function getWeekDef(week) {
+        const dates = getWeekDates(week);
+        return {
+          label: `${week}주(${formatMonthDay(dates.start)}~${formatMonthDay(dates.end)})`,
+          date: `${formatMonthDay(dates.start)} ~ ${formatMonthDay(dates.end)}`,
+          start: dates.start,
+          end: dates.end
+        };
+      }
+
+      function normalizeDateRange(startValue, endValue) {
+        const start = parseDateInput(startValue);
+        const end = parseDateInput(endValue);
+        if (!start || !end || end < start) {
+          return { ...DEFAULT_DATE_RANGE };
+        }
+        return {
+          start: formatDateInput(start),
+          end: formatDateInput(end)
+        };
+      }
+
+      function sundayOf(date) {
+        return addDays(date, -date.getUTCDay());
+      }
+
+      function normalizeWeekDateRange(startValue, endValue) {
+        const range = normalizeDateRange(startValue, endValue);
+        const start = sundayOf(parseDateInput(range.start));
+        const end = sundayOf(parseDateInput(range.end));
+        if (end < start) {
+          return {
+            planStart: DEFAULT_DATE_RANGE.start,
+            planEnd: DEFAULT_DATE_RANGE.end
+          };
+        }
+        return {
+          planStart: formatDateInput(start),
+          planEnd: formatDateInput(addDays(end, 6))
+        };
+      }
+
+      function calendarWeekOptions() {
+        const first = sundayOf(parseDateInput(CALENDAR_WEEK_START));
+        const last = sundayOf(parseDateInput(CALENDAR_WEEK_END));
+        const options = [];
+        for (let cursor = first; cursor <= last; cursor = addDays(cursor, 7)) {
+          const weekEnd = addDays(cursor, 6);
+          options.push(
+            `<option value="${formatDateInput(cursor)}">${formatMonthDay(cursor)}~${formatMonthDay(weekEnd)} (일~토)</option>`
+          );
+        }
+        return options.join("");
+      }
+
+      function populateDateInputs() {
+        const options = calendarWeekOptions();
+        const start = sundayOf(parseDateInput(state.planStart));
+        const end = sundayOf(parseDateInput(state.planEnd));
+        elements.settingsStart.innerHTML = options;
+        elements.settingsEnd.innerHTML = options;
+        elements.settingsStart.value = formatDateInput(start);
+        elements.settingsEnd.value = formatDateInput(end);
+      }
+
+      function mergeLegacyContinuation(tasks) {
+        const opening = tasks.find((item) => item.id === "opening-program");
+        const legacyContinuation = tasks.find((item) => item.id === "sixteen-program");
+        if (!opening || !legacyContinuation) return tasks;
+        opening.end = Math.min(clampWeek(opening.end), clampWeek(legacyContinuation.end));
+        opening.section = "opening";
+        return tasks.filter((item) => item.id !== "sixteen-program");
+      }
+
+      const loadState = () => {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (!saved || !Array.isArray(saved.tasks)) {
+            return { weekCount: 18, ...normalizeWeekDateRange(DEFAULT_DATE_RANGE.start, DEFAULT_DATE_RANGE.end), tasks: cloneTasks(DEFAULT_TASKS) };
+          }
+          const weekCount = RANGE_OPTIONS.includes(Number(saved.weekCount)) ? Number(saved.weekCount) : 18;
+          const dateRange = normalizeWeekDateRange(saved.planStart, saved.planEnd);
+          const tasks = mergeLegacyContinuation(saved.tasks
+            .filter((item) => item && typeof item.id === "string" && typeof item.title === "string")
+            .map((item) => ({
+              ...item,
+              start: clampWeek(item.start),
+              end: clampWeek(item.end),
+              lane: Math.max(1, Number(item.lane) || 1),
+              tone: toneForDuration(item.start, item.end)
+            })));
+          return { weekCount, ...dateRange, tasks: tasks.length ? tasks : cloneTasks(DEFAULT_TASKS) };
+        } catch (error) {
+          return { weekCount: 18, ...normalizeWeekDateRange(DEFAULT_DATE_RANGE.start, DEFAULT_DATE_RANGE.end), tasks: cloneTasks(DEFAULT_TASKS) };
+        }
+      };
+
+      let state = loadState();
+      let editingId = null;
+      let toastTimer = null;
+      let exportBusy = false;
+      let activeResize = null;
+      let suppressNextClick = false;
+
+      function clampWeek(value) {
+        const number = Number(value);
+        if (!Number.isFinite(number)) return 1;
+        return Math.max(1, Math.min(MAX_WEEK, Math.round(number)));
+      }
+
+      function durationWeeks(start, end) {
+        return Math.max(1, Math.abs(clampWeek(start) - clampWeek(end)) + 1);
+      }
+
+      function toneForDuration(start, end) {
+        return DURATION_TONES[Math.min(durationWeeks(start, end), DURATION_TONES.length) - 1];
+      }
+
+      function updateTonePreview() {
+        const start = clampWeek(elements.startInput.value);
+        const end = clampWeek(elements.endInput.value);
+        const duration = durationWeeks(start, end);
+        const tone = toneForDuration(start, end);
+        elements.toneSwatch.className = `tone-swatch tone-${tone}`;
+        elements.toneAutoLabel.textContent = `${duration}주${duration >= 7 ? " 이상" : ""} · ${TONE_LABELS[tone]} 파스텔`;
+        elements.toneAutoPreview.setAttribute("aria-label", `${duration}주 일정, ${TONE_LABELS[tone]} 색상 자동 지정`);
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (error) {
+          // The page remains usable when storage is blocked or unavailable.
+        }
+      }
+
+      function sectionForWeek(week) {
+        return SECTION_DEFS.find((section) => section.weeks.includes(Number(week))) || SECTION_DEFS[SECTION_DEFS.length - 1];
+      }
+
+      function weekRange(start, end) {
+        const high = Math.max(Number(start), Number(end));
+        const low = Math.min(Number(start), Number(end));
+        const result = [];
+        for (let week = high; week >= low; week -= 1) result.push(week);
+        return result;
+      }
+
+      function taskWeeksInSection(item, section) {
+        const range = new Set(weekRange(item.start, item.end));
+        return section.weeks.filter((week) => range.has(week) && week <= state.weekCount);
+      }
+
+      function visibleSections() {
+        return SECTION_DEFS.filter((section) => section.weeks.some((week) => week <= state.weekCount));
+      }
+
+      function layoutSectionTasks(sectionTasks) {
+        const lanes = [];
+        const laneById = new Map();
+        const orderedTasks = [...sectionTasks].sort((a, b) => {
+          const laneDifference = (Number(a.lane) || 1) - (Number(b.lane) || 1);
+          return laneDifference || a.id.localeCompare(b.id);
+        });
+
+        orderedTasks.forEach((item) => {
+          let lane = Math.max(1, Number(item.lane) || 1);
+          while (lanes[lane - 1] && lanes[lane - 1].some((other) => rangesOverlap(item.start, item.end, other))) {
+            lane += 1;
+          }
+          if (!lanes[lane - 1]) lanes[lane - 1] = [];
+          lanes[lane - 1].push(item);
+          laneById.set(item.id, lane);
+        });
+
+        return laneById;
+      }
+
+      function renderBoard() {
+        const boardScroll = document.querySelector(".board-scroll");
+        const scrollLeft = boardScroll ? boardScroll.scrollLeft : 0;
+        const sections = visibleSections();
+        elements.timeline.innerHTML = "";
+        const planStart = parseDateInput(state.planStart);
+        const planEnd = parseDateInput(state.planEnd);
+        const dateSummary = planStart && planEnd
+          ? ` · ${formatMonthDay(planStart)}~${formatMonthDay(planEnd)}`
+          : "";
+        elements.rangeSummary.innerHTML = `<strong>${state.weekCount}주 보기</strong> · ${state.weekCount}주부터 1주까지${dateSummary}`;
+        elements.weekCount.value = String(state.weekCount);
+
+        sections.forEach((section) => {
+          const weeks = section.weeks.filter((week) => week <= state.weekCount);
+          const isOpening = section.id === "opening" && state.weekCount === 18;
+          const offset = isOpening ? section.offset : 0;
+          const sectionTasks = state.tasks.filter((item) => taskWeeksInSection(item, section).length > 0);
+          const laneById = layoutSectionTasks(sectionTasks);
+          const highestLane = sectionTasks.reduce((highest, item) => Math.max(highest, laneById.get(item.id) || 1), section.rows);
+          const sectionElement = document.createElement("section");
+          sectionElement.className = "timeline-section";
+          sectionElement.dataset.sectionId = section.id;
+          sectionElement.setAttribute("aria-label", `${weeks[0]}주부터 ${weeks[weeks.length - 1]}주 일정`);
+
+          const heading = document.createElement("div");
+          heading.className = "week-heading";
+          for (let column = 0; column < 4; column += 1) {
+            if (column < offset || column - offset >= weeks.length) {
+              const spacer = document.createElement("div");
+              spacer.className = "week-spacer";
+              spacer.setAttribute("aria-hidden", "true");
+              heading.appendChild(spacer);
+            } else {
+              const week = weeks[column - offset];
+              const cell = document.createElement("div");
+              cell.className = "week-cell";
+              const label = document.createElement("span");
+              label.className = "week-label";
+              label.textContent = getWeekDef(week).label;
+              const addButton = document.createElement("button");
+              addButton.type = "button";
+              addButton.className = "week-add";
+              addButton.dataset.addWeek = String(week);
+              addButton.setAttribute("aria-label", `${week}주에 할 일 추가`);
+              addButton.textContent = "+";
+              cell.append(label, addButton);
+              heading.appendChild(cell);
+            }
+          }
+
+          const body = document.createElement("div");
+          body.className = "section-body";
+          body.style.setProperty("--rows", highestLane);
+          body.dataset.weeks = weeks.join(",");
+          body.dataset.offset = String(offset);
+          body.setAttribute("role", "list");
+
+          sectionTasks.forEach((item) => {
+            const segmentWeeks = taskWeeksInSection(item, section);
+            const firstWeek = segmentWeeks[0];
+            const lastWeek = segmentWeeks[segmentWeeks.length - 1];
+            const firstIndex = weeks.indexOf(firstWeek);
+            const lastIndex = weeks.indexOf(lastWeek);
+            if (firstIndex < 0 || lastIndex < 0) return;
+
+            const bar = document.createElement("button");
+            bar.type = "button";
+            bar.className = `task-bar tone-${toneForDuration(item.start, item.end)}`;
+            bar.style.gridColumn = `${offset + firstIndex + 1} / ${offset + lastIndex + 2}`;
+            bar.style.gridRow = String(laneById.get(item.id) || 1);
+            bar.dataset.taskId = item.id;
+            bar.setAttribute("role", "listitem");
+            if (activeResize && activeResize.id === item.id) bar.classList.add("is-dragging");
+            const continuesFromPrevious = firstWeek !== Number(item.start);
+            const continuesToNext = lastWeek !== Number(item.end);
+            if (continuesFromPrevious) bar.classList.add("is-continuation");
+            if (continuesFromPrevious) bar.classList.add("continuation-from-previous");
+            if (continuesToNext) bar.classList.add("continuation-to-next");
+            bar.setAttribute(
+              "aria-label",
+              `${item.title}, ${item.start}주부터 ${item.end}주${continuesFromPrevious ? ", 이어지는 일정" : ""}`
+            );
+
+            const title = document.createElement("span");
+            title.className = "task-title";
+            title.textContent = item.title;
+            bar.appendChild(title);
+            if (!continuesFromPrevious) {
+              const handle = document.createElement("span");
+              handle.className = "resize-handle resize-handle-start";
+              handle.dataset.resizeEdge = "start";
+              handle.setAttribute("aria-hidden", "true");
+              handle.title = "시작 주차 길이 조절";
+              bar.appendChild(handle);
+            }
+            if (!continuesToNext) {
+              const handle = document.createElement("span");
+              handle.className = "resize-handle resize-handle-end";
+              handle.dataset.resizeEdge = "end";
+              handle.setAttribute("aria-hidden", "true");
+              handle.title = "종료 주차 길이 조절";
+              bar.appendChild(handle);
+            }
+            body.appendChild(bar);
+          });
+
+          sectionElement.appendChild(heading);
+          sectionElement.appendChild(body);
+          elements.timeline.appendChild(sectionElement);
+        });
+        if (boardScroll) boardScroll.scrollLeft = scrollLeft;
+      }
+
+      function populateWeekInputs(start, end) {
+        const options = WEEK_NUMBERS
+          .map((week) => `<option value="${week}">${getWeekDef(week).label}</option>`)
+          .join("");
+        elements.startInput.innerHTML = options;
+        elements.endInput.innerHTML = options;
+        elements.startInput.value = String(clampWeek(start));
+        elements.endInput.value = String(clampWeek(end));
+      }
+
+      function updateRangePreview() {
+        const start = clampWeek(elements.startInput.value);
+        const end = clampWeek(elements.endInput.value);
+        const high = Math.max(start, end);
+        const low = Math.min(start, end);
+        const directionNote = start >= end ? "정상적인 시간 순서" : "시작 주차가 종료 주차보다 뒤라 자동으로 순서를 맞춥니다";
+        const dateStart = formatMonthDay(getWeekDef(high).start);
+        const dateEnd = formatMonthDay(getWeekDef(low).end);
+        elements.rangePreview.textContent = `${dateStart} ~ ${dateEnd} · ${high - low + 1}주 범위 · ${directionNote}`;
+      }
+
+      function setSettingsError(message) {
+        elements.settingsError.textContent = message;
+        elements.settingsError.hidden = !message;
+      }
+
+      function updateSettingsPreview() {
+        const start = parseDateInput(elements.settingsStart.value);
+        const endStart = parseDateInput(elements.settingsEnd.value);
+        if (!start || !endStart) {
+          elements.settingsPreview.textContent = "시작 주와 종료 주를 모두 선택하세요.";
+          return;
+        }
+        if (endStart < start) {
+          elements.settingsPreview.textContent = "종료 주는 시작 주보다 빠를 수 없습니다.";
+          return;
+        }
+        const end = addDays(endStart, 6);
+        const weeks = Math.floor((endStart.getTime() - start.getTime()) / (86400000 * 7)) + 1;
+        elements.settingsPreview.textContent = `${formatMonthDay(start)} ~ ${formatMonthDay(end)} · 총 ${weeks}주 · 일요일~토요일`;
+      }
+
+      function openSettings() {
+        populateDateInputs();
+        setSettingsError("");
+        updateSettingsPreview();
+        elements.settingsLayer.hidden = false;
+        document.body.style.overflow = "hidden";
+        window.requestAnimationFrame(() => elements.settingsStart.focus());
+      }
+
+      function closeSettings() {
+        elements.settingsLayer.hidden = true;
+        document.body.style.overflow = "";
+        setSettingsError("");
+      }
+
+      function setEditorError(message) {
+        elements.error.textContent = message;
+        elements.error.hidden = !message;
+      }
+
+      function openEditor(id, defaults = {}) {
+        const existing = id ? state.tasks.find((item) => item.id === id) : null;
+        editingId = id;
+        elements.editorTitle.textContent = existing ? "할 일 수정" : "할 일 추가";
+        elements.titleInput.value = existing ? existing.title : "";
+        const start = existing ? existing.start : clampWeek(defaults.start ?? state.weekCount);
+        const end = existing ? existing.end : clampWeek(defaults.end ?? start);
+        populateWeekInputs(start, end);
+        elements.deleteTask.hidden = !existing;
+        setEditorError("");
+        updateRangePreview();
+        updateTonePreview();
+        elements.layer.hidden = false;
+        document.body.style.overflow = "hidden";
+        window.requestAnimationFrame(() => elements.titleInput.focus());
+      }
+
+      function closeEditor() {
+        elements.layer.hidden = true;
+        document.body.style.overflow = "";
+        editingId = null;
+        setEditorError("");
+      }
+
+      function showToast(message) {
+        window.clearTimeout(toastTimer);
+        elements.toast.textContent = message;
+        elements.toast.classList.add("is-visible");
+        toastTimer = window.setTimeout(() => elements.toast.classList.remove("is-visible"), 2400);
+      }
+
+      function svgEscape(value) {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&apos;");
+      }
+
+      function stylePixels(value, fallback) {
+        const number = Number.parseFloat(value);
+        return Number.isFinite(number) ? number : fallback;
+      }
+
+      function relativeRect(element, parentRect) {
+        const rect = element.getBoundingClientRect();
+        return {
+          x: rect.left - parentRect.left,
+          y: rect.top - parentRect.top,
+          width: rect.width,
+          height: rect.height
+        };
+      }
+
+      function wrapSvgText(text, maxWidth, font) {
+        const measureCanvas = document.createElement("canvas");
+        const context = measureCanvas.getContext("2d");
+        context.font = font;
+        const lines = [];
+        String(text).split("\n").forEach((sourceLine) => {
+          let line = "";
+          for (const character of sourceLine) {
+            const candidate = line + character;
+            if (line && context.measureText(candidate).width > maxWidth) {
+              lines.push(line);
+              line = character;
+            } else {
+              line = candidate;
+            }
+          }
+          lines.push(line || " ");
+        });
+        return lines;
+      }
+
+      async function buildExportSvg() {
+        if (document.fonts && document.fonts.ready) await document.fonts.ready;
+        const sourceTimeline = document.querySelector(".timeline");
+        const sourceScroll = document.querySelector(".board-scroll");
+        const previousScroll = sourceScroll.scrollLeft;
+        sourceScroll.scrollLeft = 0;
+
+        try {
+          const timelineRect = sourceTimeline.getBoundingClientRect();
+          const tableWidth = Math.max(980, sourceTimeline.scrollWidth);
+          const tableHeight = Math.ceil(timelineRect.height);
+          const horizontalPadding = 64;
+          const topPadding = 64;
+          const bottomPadding = 44;
+          const title = document.querySelector("h1");
+          const titleStyle = getComputedStyle(title);
+          const titleFontSize = stylePixels(titleStyle.fontSize, 42);
+          const titleLineHeight = stylePixels(titleStyle.lineHeight, titleFontSize * 1.1);
+          const tableTop = topPadding + titleLineHeight + 26;
+          const width = tableWidth + horizontalPadding * 2;
+          const height = tableTop + tableHeight + bottomPadding;
+          const parts = [
+            `<svg xmlns="http://www.w3.org/2000/svg" width="${width * 2}" height="${height * 2}" viewBox="0 0 ${width} ${height}">`,
+            `<rect width="${width}" height="${height}" fill="#f6f5f1"/>`,
+            `<text x="${horizontalPadding}" y="${topPadding + titleFontSize}" fill="${svgEscape(titleStyle.color)}" font-family="${svgEscape(titleStyle.fontFamily)}" font-size="${titleFontSize}" font-weight="${svgEscape(titleStyle.fontWeight)}">${svgEscape(title.textContent.trim())}</text>`
+          ];
+          const draw = (markup) => parts.push(markup);
+
+          document.querySelectorAll(".timeline-section").forEach((section) => {
+            const sectionRect = relativeRect(section, timelineRect);
+            const heading = section.querySelector(".week-heading");
+            const headingRect = relativeRect(heading, timelineRect);
+            const headingStyle = getComputedStyle(heading);
+            draw(
+              `<rect x="${horizontalPadding + sectionRect.x}" y="${tableTop + headingRect.y}" width="${headingRect.width}" height="${headingRect.height}" fill="${svgEscape(headingStyle.backgroundColor)}" stroke="#53565a" stroke-width="1"/>`
+            );
+
+            section.querySelectorAll(".week-cell, .week-spacer").forEach((cell) => {
+              const cellRect = relativeRect(cell, timelineRect);
+              const cellStyle = getComputedStyle(cell);
+              draw(
+                `<rect x="${horizontalPadding + cellRect.x}" y="${tableTop + cellRect.y}" width="${cellRect.width}" height="${cellRect.height}" fill="${svgEscape(cellStyle.backgroundColor || headingStyle.backgroundColor)}" stroke="#53565a" stroke-width="1"/>`
+              );
+              const label = cell.querySelector(".week-label");
+              if (!label) return;
+              const labelRect = relativeRect(label, timelineRect);
+              const labelStyle = getComputedStyle(label);
+              draw(
+                `<text x="${horizontalPadding + labelRect.x + labelRect.width / 2}" y="${tableTop + labelRect.y + stylePixels(labelStyle.fontSize, 13)}" fill="${svgEscape(labelStyle.color)}" font-family="${svgEscape(labelStyle.fontFamily)}" font-size="${stylePixels(labelStyle.fontSize, 13)}" font-weight="${svgEscape(labelStyle.fontWeight)}" text-anchor="middle">${svgEscape(label.textContent)}</text>`
+              );
+            });
+
+            const body = section.querySelector(".section-body");
+            const bodyRect = relativeRect(body, timelineRect);
+            const bodyStyle = getComputedStyle(body);
+            draw(
+              `<rect x="${horizontalPadding + bodyRect.x}" y="${tableTop + bodyRect.y}" width="${bodyRect.width}" height="${bodyRect.height}" fill="${svgEscape(bodyStyle.backgroundColor)}" stroke="#53565a" stroke-width="1"/>`
+            );
+            for (let column = 1; column < 4; column += 1) {
+              const x = horizontalPadding + bodyRect.x + bodyRect.width * column / 4;
+              draw(`<line x1="${x}" y1="${tableTop + bodyRect.y}" x2="${x}" y2="${tableTop + bodyRect.y + bodyRect.height}" stroke="#53565a" stroke-width="1"/>`);
+            }
+
+            body.querySelectorAll(".task-bar").forEach((bar) => {
+              const barRect = relativeRect(bar, timelineRect);
+              const barStyle = getComputedStyle(bar);
+              const title = bar.querySelector(".task-title");
+              const titleStyle = getComputedStyle(title);
+              const paddingLeft = stylePixels(barStyle.paddingLeft, 13);
+              const paddingRight = stylePixels(barStyle.paddingRight, 9);
+              const paddingTop = stylePixels(barStyle.paddingTop, 6);
+              const paddingBottom = stylePixels(barStyle.paddingBottom, 6);
+              const fontSize = stylePixels(titleStyle.fontSize, 12);
+              const lineHeight = stylePixels(titleStyle.lineHeight, fontSize * 1.3);
+              const font = `${titleStyle.fontWeight} ${fontSize}px ${titleStyle.fontFamily}`;
+              const lines = wrapSvgText(title.textContent, Math.max(20, barRect.width - paddingLeft - paddingRight), font);
+              const maxLines = Math.max(1, Math.floor((barRect.height - paddingTop - paddingBottom + 2) / lineHeight));
+              const visibleLines = lines.slice(0, maxLines);
+              const radius = bar.classList.contains("continuation-from-previous") || bar.classList.contains("continuation-to-next") ? 0 : 5;
+              draw(
+                `<rect x="${horizontalPadding + barRect.x}" y="${tableTop + barRect.y}" width="${barRect.width}" height="${barRect.height}" rx="${radius}" fill="${svgEscape(barStyle.backgroundColor)}"/>`
+              );
+              const markerTop = tableTop + barRect.y + 7;
+              draw(
+                `<rect x="${horizontalPadding + barRect.x + 8}" y="${markerTop}" width="3" height="${Math.max(3, barRect.height - 14)}" rx="2" fill="${svgEscape(barStyle.color)}" opacity="${bar.classList.contains("is-continuation") ? ".42" : ".95"}"/>`
+              );
+              visibleLines.forEach((line, lineIndex) => {
+                const y = tableTop + barRect.y + paddingTop + fontSize * .86 + lineIndex * lineHeight;
+                draw(
+                  `<text x="${horizontalPadding + barRect.x + paddingLeft}" y="${y}" fill="${svgEscape(titleStyle.color)}" font-family="${svgEscape(titleStyle.fontFamily)}" font-size="${fontSize}" font-weight="${svgEscape(titleStyle.fontWeight)}">${svgEscape(line)}</text>`
+                );
+              });
+            });
+          });
+
+          parts.push("</svg>");
+          return { width, height, svg: parts.join("") };
+        } finally {
+          sourceScroll.scrollLeft = previousScroll;
+        }
+      }
+
+      function imageFromSvg(svg) {
+        return new Promise((resolve, reject) => {
+          const image = new Image();
+          const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
+          image.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve(image);
+          };
+          image.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error("내보내기 이미지를 만들 수 없습니다."));
+          };
+          image.src = url;
+        });
+      }
+
+      async function downloadBoard() {
+        if (exportBusy) return;
+        exportBusy = true;
+        const previousWeekCount = state.weekCount;
+        const shouldRestoreWeekCount = previousWeekCount !== MAX_WEEK;
+        if (shouldRestoreWeekCount) {
+          state.weekCount = MAX_WEEK;
+          renderBoard();
+        }
+        try {
+          const { width, height, svg } = await buildExportSvg();
+          const image = await imageFromSvg(svg);
+          const canvas = document.createElement("canvas");
+          canvas.width = width * 2;
+          canvas.height = height * 2;
+          const context = canvas.getContext("2d");
+          context.fillStyle = "#f6f5f1";
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          const extension = "jpg";
+          const mime = "image/jpeg";
+          const blob = await new Promise((resolve, reject) => {
+            canvas.toBlob((result) => result ? resolve(result) : reject(new Error("파일을 저장할 수 없습니다.")), mime, .94);
+          });
+          const link = document.createElement("a");
+          const downloadUrl = URL.createObjectURL(blob);
+          link.href = downloadUrl;
+          link.download = `radical-weekly-plan-full-${MAX_WEEK}weeks.${extension}`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+          showToast(`전체 ${MAX_WEEK}주 JPG 파일을 다운로드했습니다.`);
+        } catch (error) {
+          showToast(error.message || "다운로드에 실패했습니다.");
+        } finally {
+          if (shouldRestoreWeekCount) {
+            state.weekCount = previousWeekCount;
+            renderBoard();
+          }
+          exportBusy = false;
+        }
+      }
+
+      function nextTaskId() {
+        return `task-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      }
+
+      function rangesOverlap(start, end, item) {
+        const first = Math.min(start, end);
+        const last = Math.max(start, end);
+        return weekRange(item.start, item.end).some((week) => week >= first && week <= last);
+      }
+
+      function nextAvailableLane(start, end, ignoreId = null) {
+        const occupied = new Set(
+          state.tasks
+            .filter((item) => item.id !== ignoreId && rangesOverlap(start, end, item))
+            .map((item) => Number(item.lane) || 1)
+        );
+        let lane = 1;
+        while (occupied.has(lane)) lane += 1;
+        return lane;
+      }
+
+      function laneIsAvailable(lane, start, end, ignoreId = null) {
+        return !state.tasks.some(
+          (item) =>
+            item.id !== ignoreId &&
+            (Number(item.lane) || 1) === lane &&
+            rangesOverlap(start, end, item)
+        );
+      }
+
+      function weekFromPoint(clientX, clientY) {
+        const section = [...document.querySelectorAll(".timeline-section")].find((candidate) => {
+          const rect = candidate.getBoundingClientRect();
+          return clientY >= rect.top && clientY <= rect.bottom;
+        });
+        if (!section) return null;
+        const body = section.querySelector(".section-body");
+        const weeks = (body.dataset.weeks || "").split(",").map(Number).filter(Boolean);
+        const offset = Number(body.dataset.offset) || 0;
+        const rect = body.getBoundingClientRect();
+        if (!weeks.length || !rect.width) return null;
+        const columnWidth = rect.width / 4;
+        const column = Math.max(0, Math.min(3, Math.floor((clientX - rect.left) / columnWidth)));
+        const index = Math.max(0, Math.min(weeks.length - 1, column - offset));
+        return weeks[index];
+      }
+
+      function beginResize(event) {
+        const handle = event.target.closest(".resize-handle");
+        if (!handle) return;
+        const bar = handle.closest("[data-task-id]");
+        const item = bar && state.tasks.find((candidate) => candidate.id === bar.dataset.taskId);
+        if (!item) return;
+        activeResize = {
+          id: item.id,
+          edge: handle.dataset.resizeEdge,
+          moved: false,
+          pointerId: event.pointerId
+        };
+        document.body.classList.add("is-resizing");
+        try {
+          elements.timeline.setPointerCapture(event.pointerId);
+        } catch (error) {
+          // Pointer capture is unavailable in a few embedded mobile browsers.
+        }
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      function resizeTask(event) {
+        if (!activeResize) return;
+        if (event.pointerId !== activeResize.pointerId) return;
+        const item = state.tasks.find((candidate) => candidate.id === activeResize.id);
+        if (!item) return;
+        const week = weekFromPoint(event.clientX, event.clientY);
+        if (!week) return;
+        const nextStart = activeResize.edge === "start" ? Math.max(week, item.end) : item.start;
+        const nextEnd = activeResize.edge === "end" ? Math.min(week, item.start) : item.end;
+        if (nextStart === item.start && nextEnd === item.end) return;
+        item.start = nextStart;
+        item.end = nextEnd;
+        activeResize.moved = true;
+        renderBoard();
+        event.preventDefault();
+      }
+
+      function finishResize(event) {
+        if (!activeResize) return;
+        if (event.pointerId !== activeResize.pointerId) return;
+        const resize = activeResize;
+        activeResize = null;
+        document.body.classList.remove("is-resizing");
+        try {
+          if (elements.timeline.hasPointerCapture(resize.pointerId)) {
+            elements.timeline.releasePointerCapture(resize.pointerId);
+          }
+        } catch (error) {
+          // Ignore release errors when a browser already ended the pointer.
+        }
+        const item = state.tasks.find((candidate) => candidate.id === resize.id);
+        if (item && resize.moved) {
+          const preferredLane = Number(item.lane) || 1;
+          if (!laneIsAvailable(preferredLane, item.start, item.end, item.id)) {
+            item.lane = nextAvailableLane(item.start, item.end, item.id);
+          }
+          item.tone = toneForDuration(item.start, item.end);
+          item.section = sectionForWeek(item.start).id;
+          saveState();
+          renderBoard();
+          showToast(`${resize.edge === "start" ? "시작" : "종료"} 주차를 조절했습니다.`);
+        }
+        suppressNextClick = resize.moved;
+        if (suppressNextClick) {
+          window.setTimeout(() => {
+            suppressNextClick = false;
+          }, 0);
+        }
+        event.preventDefault();
+      }
+
+      elements.timeline.addEventListener("click", (event) => {
+        if (suppressNextClick) {
+          suppressNextClick = false;
+          return;
+        }
+        const addWeekButton = event.target.closest("[data-add-week]");
+        if (addWeekButton) {
+          const week = clampWeek(addWeekButton.dataset.addWeek);
+          openEditor(null, { start: week, end: week });
+          return;
+        }
+        const bar = event.target.closest("[data-task-id]");
+        if (!bar) return;
+        openEditor(bar.dataset.taskId);
+      });
+
+      elements.timeline.addEventListener("pointerdown", beginResize);
+      document.addEventListener("pointermove", resizeTask, { passive: false });
+      document.addEventListener("pointerup", finishResize, { passive: false });
+      document.addEventListener("pointercancel", finishResize, { passive: false });
+
+      elements.weekCount.addEventListener("change", () => {
+        const value = Number(elements.weekCount.value);
+        if (!RANGE_OPTIONS.includes(value)) return;
+        state.weekCount = value;
+        saveState();
+        renderBoard();
+        showToast(`${value}주 보기로 변경했습니다.`);
+      });
+
+      elements.addTask.addEventListener("click", () => openEditor(null));
+      elements.dateSettings.addEventListener("click", openSettings);
+      elements.downloadJpg.addEventListener("click", downloadBoard);
+      elements.settingsStart.addEventListener("change", updateSettingsPreview);
+      elements.settingsEnd.addEventListener("change", updateSettingsPreview);
+      elements.closeSettings.addEventListener("click", closeSettings);
+      elements.cancelSettings.addEventListener("click", closeSettings);
+      elements.closeEditor.addEventListener("click", closeEditor);
+      elements.cancelEditor.addEventListener("click", closeEditor);
+      elements.startInput.addEventListener("change", updateRangePreview);
+      elements.endInput.addEventListener("change", updateRangePreview);
+      elements.startInput.addEventListener("change", updateTonePreview);
+      elements.endInput.addEventListener("change", updateTonePreview);
+
+      elements.layer.addEventListener("click", (event) => {
+        if (event.target === elements.layer) closeEditor();
+      });
+
+      elements.settingsLayer.addEventListener("click", (event) => {
+        if (event.target === elements.settingsLayer) closeSettings();
+      });
+
+      elements.settingsForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const start = parseDateInput(elements.settingsStart.value);
+        const endStart = parseDateInput(elements.settingsEnd.value);
+        if (!start || !endStart) {
+          setSettingsError("시작 주와 종료 주를 모두 선택하세요.");
+          return;
+        }
+        if (endStart < start) {
+          setSettingsError("종료 주는 시작 주보다 빠를 수 없습니다.");
+          return;
+        }
+        state.planStart = formatDateInput(start);
+        state.planEnd = formatDateInput(addDays(endStart, 6));
+        saveState();
+        renderBoard();
+        closeSettings();
+        showToast("전체 날짜 범위를 저장했습니다.");
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape") return;
+        if (!elements.layer.hidden) closeEditor();
+        if (!elements.settingsLayer.hidden) closeSettings();
+      });
+
+      elements.deleteTask.addEventListener("click", () => {
+        if (!editingId) return;
+        const target = state.tasks.find((item) => item.id === editingId);
+        if (!target) return;
+        if (!window.confirm("이 할 일을 삭제할까요?")) return;
+        state.tasks = state.tasks.filter((item) => item.id !== editingId);
+        saveState();
+        renderBoard();
+        closeEditor();
+        showToast("할 일을 삭제했습니다.");
+      });
+
+      elements.form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const title = elements.titleInput.value.trim();
+        if (!title) {
+          setEditorError("할 일을 입력하세요.");
+          elements.titleInput.focus();
+          return;
+        }
+
+        const start = clampWeek(elements.startInput.value);
+        const end = clampWeek(elements.endInput.value);
+        const high = Math.max(start, end);
+        const low = Math.min(start, end);
+        const nextValues = {
+          title,
+          start: high,
+          end: low,
+          tone: toneForDuration(high, low),
+          section: sectionForWeek(high).id
+        };
+
+        if (editingId) {
+          const index = state.tasks.findIndex((item) => item.id === editingId);
+          if (index < 0) return;
+          const previous = state.tasks[index];
+          const preferredLane = Number(previous.lane) || 1;
+          const lane = laneIsAvailable(preferredLane, high, low, editingId)
+            ? preferredLane
+            : nextAvailableLane(high, low, editingId);
+          state.tasks[index] = { ...previous, ...nextValues, lane };
+          showToast("할 일을 수정했습니다.");
+        } else {
+          const lane = nextAvailableLane(high, low);
+          state.tasks.push({ id: nextTaskId(), lane, ...nextValues });
+          showToast("새 할 일을 추가했습니다.");
+        }
+
+        saveState();
+        renderBoard();
+        closeEditor();
+      });
+
+      renderBoard();
+    })();
+  </script>
+</body>
+</html>
