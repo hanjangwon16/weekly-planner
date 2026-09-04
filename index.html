@@ -245,7 +245,7 @@
     .week-heading,
     .section-body {
       display: grid;
-      grid-template-columns: repeat(var(--columns, 4), minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
     .week-heading {
@@ -254,7 +254,8 @@
       background: var(--header);
     }
 
-    .week-cell {
+    .week-cell,
+    .week-spacer {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -273,7 +274,8 @@
 
     .week-cell { padding-right: 34px; }
 
-    .week-cell:last-child { border-right: 0; }
+    .week-cell:last-child,
+    .week-spacer:last-child { border-right: 0; }
 
     .week-add {
       position: absolute;
@@ -324,7 +326,7 @@
         var(--line) 100%
       );
       background-repeat: repeat-x;
-      background-size: var(--column-width, 25%) 100%;
+      background-size: 25% 100%;
       content: "";
       pointer-events: none;
     }
@@ -1287,9 +1289,11 @@
         const visibleWeeks = WEEK_NUMBERS.filter((week) => week <= state.weekCount);
         const rows = [];
         for (let index = 0; index < visibleWeeks.length; index += 4) {
+          const weeks = visibleWeeks.slice(index, index + 4);
           rows.push({
             id: `row-${index / 4}`,
-            weeks: visibleWeeks.slice(index, index + 4)
+            weeks,
+            offset: 4 - weeks.length
           });
         }
         return rows;
@@ -1331,6 +1335,7 @@
 
         sections.forEach((section) => {
           const weeks = section.weeks;
+          const offset = section.offset;
           const sectionTasks = state.tasks.filter((item) => taskWeeksInSection(item, section).length > 0);
           const laneById = layoutSectionTasks(sectionTasks);
           const highestLane = sectionTasks.reduce((highest, item) => Math.max(highest, laneById.get(item.id) || 1), 1);
@@ -1341,8 +1346,16 @@
 
           const heading = document.createElement("div");
           heading.className = "week-heading";
-          heading.style.setProperty("--columns", weeks.length);
-          weeks.forEach((week) => {
+          for (let column = 0; column < 4; column += 1) {
+            const weekIndex = column - offset;
+            if (weekIndex < 0 || weekIndex >= weeks.length) {
+              const spacer = document.createElement("div");
+              spacer.className = "week-spacer";
+              spacer.setAttribute("aria-hidden", "true");
+              heading.appendChild(spacer);
+              continue;
+            }
+            const week = weeks[weekIndex];
             const cell = document.createElement("div");
             cell.className = "week-cell";
             const label = document.createElement("span");
@@ -1356,14 +1369,13 @@
             addButton.textContent = "+";
             cell.append(label, addButton);
             heading.appendChild(cell);
-          });
+          }
 
           const body = document.createElement("div");
           body.className = "section-body";
-          body.style.setProperty("--columns", weeks.length);
-          body.style.setProperty("--column-width", `${100 / weeks.length}%`);
           body.style.setProperty("--rows", highestLane);
           body.dataset.weeks = weeks.join(",");
+          body.dataset.offset = String(offset);
           body.setAttribute("role", "list");
 
           sectionTasks.forEach((item) => {
@@ -1377,7 +1389,7 @@
             const bar = document.createElement("button");
             bar.type = "button";
             bar.className = `task-bar tone-${toneForDuration(item.start, item.end)}`;
-            bar.style.gridColumn = `${firstIndex + 1} / ${lastIndex + 2}`;
+            bar.style.gridColumn = `${offset + firstIndex + 1} / ${offset + lastIndex + 2}`;
             bar.style.gridRow = String(laneById.get(item.id) || 1);
             bar.dataset.taskId = item.id;
             bar.setAttribute("role", "listitem");
@@ -1597,7 +1609,7 @@
               `<rect x="${horizontalPadding + sectionRect.x}" y="${tableTop + headingRect.y}" width="${headingRect.width}" height="${headingRect.height}" fill="${svgEscape(headingStyle.backgroundColor)}" stroke="#53565a" stroke-width="1"/>`
             );
 
-            section.querySelectorAll(".week-cell").forEach((cell) => {
+            section.querySelectorAll(".week-cell, .week-spacer").forEach((cell) => {
               const cellRect = relativeRect(cell, timelineRect);
               const cellStyle = getComputedStyle(cell);
               draw(
@@ -1618,11 +1630,12 @@
             draw(
               `<rect x="${horizontalPadding + bodyRect.x}" y="${tableTop + bodyRect.y}" width="${bodyRect.width}" height="${bodyRect.height}" fill="${svgEscape(bodyStyle.backgroundColor)}" stroke="#53565a" stroke-width="1"/>`
             );
-            const columns = Math.max(1, section.querySelectorAll(".week-cell").length);
-            for (let column = 1; column < columns; column += 1) {
-              const x = horizontalPadding + bodyRect.x + bodyRect.width * column / columns;
+            const gridCells = [...heading.children];
+            gridCells.slice(0, -1).forEach((cell) => {
+              const cellRect = relativeRect(cell, timelineRect);
+              const x = horizontalPadding + cellRect.x + cellRect.width;
               draw(`<line x1="${x}" y1="${tableTop + bodyRect.y}" x2="${x}" y2="${tableTop + bodyRect.y + bodyRect.height}" stroke="#53565a" stroke-width="1"/>`);
-            }
+            });
 
             body.querySelectorAll(".task-bar").forEach((bar) => {
               const barRect = relativeRect(bar, timelineRect);
@@ -1763,10 +1776,12 @@
         if (!section) return null;
         const body = section.querySelector(".section-body");
         const weeks = (body.dataset.weeks || "").split(",").map(Number).filter(Boolean);
+        const offset = Number(body.dataset.offset) || 0;
         const rect = body.getBoundingClientRect();
         if (!weeks.length || !rect.width) return null;
-        const columnWidth = rect.width / weeks.length;
-        const index = Math.max(0, Math.min(weeks.length - 1, Math.floor((clientX - rect.left) / columnWidth)));
+        const columnWidth = rect.width / 4;
+        const column = Math.max(0, Math.min(3, Math.floor((clientX - rect.left) / columnWidth)));
+        const index = Math.max(0, Math.min(weeks.length - 1, column - offset));
         return weeks[index];
       }
 
