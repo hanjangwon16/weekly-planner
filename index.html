@@ -782,7 +782,7 @@
         <p class="hero-note">일정 막대를 누르면 수정하고, 양끝을 드래그하면 주차 범위를 조절할 수 있습니다.</p>
       </div>
       <div class="hero-actions" aria-label="계획표 설정">
-        <button class="ghost-button" id="go-back" type="button">뒤로가기</button>
+        <button class="ghost-button" id="go-back" type="button" title="직전 작업 실행취소 (Ctrl/Cmd+Z)" disabled>실행취소</button>
         <label class="range-picker">
           <span>주차 범위</span>
           <select id="week-count" aria-label="주차 범위">
@@ -1223,13 +1223,16 @@
               lane: Math.max(1, Number(item.lane) || 1),
               tone: toneForDuration(item.start, item.end)
             })));
-          return { weekCount, ...dateRange, tasks: tasks.length ? tasks : cloneTasks(DEFAULT_TASKS) };
+          return { weekCount, ...dateRange, tasks };
         } catch (error) {
           return { weekCount: 18, ...normalizeWeekDateRange(DEFAULT_DATE_RANGE.start, DEFAULT_DATE_RANGE.end), tasks: cloneTasks(DEFAULT_TASKS) };
         }
       };
 
       let state = loadState();
+      const undoHistory = [];
+      const UNDO_LIMIT = 100;
+      let committedState = JSON.stringify(state);
       let editingId = null;
       let toastTimer = null;
       let exportBusy = false;
@@ -1260,12 +1263,28 @@
         elements.toneAutoPreview.setAttribute("aria-label", `${duration}주 일정, ${TONE_LABELS[tone]} 색상 자동 지정`);
       }
 
-      function saveState() {
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        } catch (error) {
-          // The page remains usable when storage is blocked or unavailable.
+      function saveState(message, recordHistory = true) {
+        const snapshot = JSON.stringify(state);
+        if (recordHistory && snapshot !== committedState) {
+          undoHistory.push(committedState);
+          if (undoHistory.length > UNDO_LIMIT) undoHistory.shift();
         }
+        committedState = snapshot;
+        elements.goBack.disabled = undoHistory.length === 0;
+        try {
+          localStorage.setItem(STORAGE_KEY, snapshot);
+          showToast(message);
+        } catch (error) {
+          showToast("변경은 화면에 적용했지만 저장하지 못했습니다. 새로고침하면 변경 내용이 사라질 수 있습니다.");
+        }
+      }
+
+      function undoLastAction() {
+        if (activeResize || !elements.layer.hidden || !elements.settingsLayer.hidden) return;
+        if (!undoHistory.length) return;
+        state = JSON.parse(undoHistory.pop());
+        saveState("직전 작업을 실행취소했습니다.", false);
+        renderBoard();
       }
 
       function sectionForWeek(week) {
@@ -1787,6 +1806,7 @@
       }
 
       function beginResize(event) {
+        if (activeResize || event.button !== 0) return;
         const handle = event.target.closest(".resize-handle");
         if (!handle) return;
         const bar = handle.closest("[data-task-id]");
@@ -1795,6 +1815,7 @@
         activeResize = {
           id: item.id,
           edge: handle.dataset.resizeEdge,
+          before: JSON.stringify(state),
           moved: false,
           pointerId: event.pointerId
         };
@@ -1839,17 +1860,19 @@
           // Ignore release errors when a browser already ended the pointer.
         }
         const item = state.tasks.find((candidate) => candidate.id === resize.id);
-        if (item && resize.moved) {
+        const original = JSON.parse(resize.before).tasks.find((candidate) => candidate.id === resize.id);
+        if (event.type === "pointercancel") {
+          state = JSON.parse(resize.before);
+        } else if (item && (item.start !== original.start || item.end !== original.end)) {
           const preferredLane = Number(item.lane) || 1;
           if (!laneIsAvailable(preferredLane, item.start, item.end, item.id)) {
             item.lane = nextAvailableLane(item.start, item.end, item.id);
           }
           item.tone = toneForDuration(item.start, item.end);
           item.section = sectionForWeek(item.start).id;
-          saveState();
-          renderBoard();
-          showToast(`${resize.edge === "start" ? "시작" : "종료"} 주차를 조절했습니다.`);
+          saveState(`${resize.edge === "start" ? "시작" : "종료"} 주차를 조절했습니다.`);
         }
+        renderBoard();
         suppressNextClick = resize.moved;
         if (suppressNextClick) {
           window.setTimeout(() => {
@@ -1884,18 +1907,11 @@
         const value = Number(elements.weekCount.value);
         if (!RANGE_OPTIONS.includes(value)) return;
         state.weekCount = value;
-        saveState();
+        saveState(`${value}주 보기로 변경했습니다.`);
         renderBoard();
-        showToast(`${value}주 보기로 변경했습니다.`);
       });
 
-      elements.goBack.addEventListener("click", () => {
-        if (window.history.length > 1) {
-          window.history.back();
-          return;
-        }
-        showToast("이전 페이지가 없습니다.");
-      });
+      elements.goBack.addEventListener("click", undoLastAction);
 
       elements.addTask.addEventListener("click", () => openEditor(null));
       elements.dateSettings.addEventListener("click", openSettings);
@@ -1939,13 +1955,19 @@
         state.planStart = formatDateInput(start);
         state.planEnd = formatDateInput(addDays(endStart, 6));
         state.weekCount = weeks;
-        saveState();
+        saveState(`전체 날짜 범위와 ${weeks}주 보기를 저장했습니다.`);
         renderBoard();
         closeSettings();
-        showToast(`전체 날짜 범위와 ${weeks}주 보기를 저장했습니다.`);
       });
 
       document.addEventListener("keydown", (event) => {
+        if ((event.ctrlKey || event.metaKey) && !event.altKey && !event.shiftKey && event.key.toLowerCase() === "z") {
+          if (event.isComposing || event.target.closest("input, textarea, select, [contenteditable]:not([contenteditable='false'])")) return;
+          if (!elements.layer.hidden || !elements.settingsLayer.hidden || activeResize) return;
+          event.preventDefault();
+          undoLastAction();
+          return;
+        }
         if (event.key !== "Escape") return;
         if (!elements.layer.hidden) closeEditor();
         if (!elements.settingsLayer.hidden) closeSettings();
@@ -1957,10 +1979,9 @@
         if (!target) return;
         if (!window.confirm("이 할 일을 삭제할까요?")) return;
         state.tasks = state.tasks.filter((item) => item.id !== editingId);
-        saveState();
+        saveState("할 일을 삭제했습니다.");
         renderBoard();
         closeEditor();
-        showToast("할 일을 삭제했습니다.");
       });
 
       elements.form.addEventListener("submit", (event) => {
@@ -1993,14 +2014,12 @@
             ? preferredLane
             : nextAvailableLane(high, low, editingId);
           state.tasks[index] = { ...previous, ...nextValues, lane };
-          showToast("할 일을 수정했습니다.");
         } else {
           const lane = nextAvailableLane(high, low);
           state.tasks.push({ id: nextTaskId(), lane, ...nextValues });
-          showToast("새 할 일을 추가했습니다.");
         }
 
-        saveState();
+        saveState(editingId ? "할 일을 수정했습니다." : "새 할 일을 추가했습니다.");
         renderBoard();
         closeEditor();
       });
