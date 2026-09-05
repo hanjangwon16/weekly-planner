@@ -1598,22 +1598,44 @@
 
       async function buildExportSvg() {
         if (document.fonts && document.fonts.ready) await document.fonts.ready;
-        const sourceTimeline = document.querySelector(".timeline");
-        const sourceScroll = document.querySelector(".board-scroll");
-        const previousScroll = sourceScroll.scrollLeft;
-        sourceScroll.scrollLeft = 0;
+        const sourceTimeline = document.querySelector(".timeline").cloneNode(true);
+        sourceTimeline.removeAttribute("id");
+        sourceTimeline.setAttribute("aria-hidden", "true");
+        sourceTimeline.inert = true;
+        const tableWidth = 1280;
+        const fontSize = 16;
+        const lineHeight = 20;
+        const fontWeight = "600";
+        Object.assign(sourceTimeline.style, {
+          position: "fixed", left: "-10000px", top: "0", width: `${tableWidth}px`,
+          pointerEvents: "none"
+        });
+        document.body.appendChild(sourceTimeline);
 
         try {
+          sourceTimeline.querySelectorAll(".task-bar").forEach((bar) => {
+            Object.assign(bar.style, {
+              fontSize: `${fontSize}px`, fontWeight, lineHeight: `${lineHeight}px`,
+              letterSpacing: "normal", padding: "6px 12px 6px 20px",
+              transform: "none", transition: "none"
+            });
+            const title = bar.querySelector(".task-title");
+            Object.assign(title.style, {
+              fontSize: "inherit", fontWeight: "inherit", lineHeight: "inherit",
+              color: "#3f4146", whiteSpace: "pre"
+            });
+            const font = `${fontWeight} ${fontSize}px ${getComputedStyle(title).fontFamily}`;
+            title.textContent = wrapSvgText(title.textContent, bar.getBoundingClientRect().width - 32, font).join("\n");
+          });
           const timelineRect = sourceTimeline.getBoundingClientRect();
-          const tableWidth = Math.max(980, sourceTimeline.scrollWidth);
           const tableHeight = Math.ceil(timelineRect.height);
-          const horizontalPadding = 64;
-          const topPadding = 64;
-          const bottomPadding = 44;
+          const horizontalPadding = 32;
+          const topPadding = 32;
+          const bottomPadding = 32;
           const title = document.querySelector("h1");
           const titleStyle = getComputedStyle(title);
-          const titleFontSize = stylePixels(titleStyle.fontSize, 42);
-          const titleLineHeight = stylePixels(titleStyle.lineHeight, titleFontSize * 1.1);
+          const titleFontSize = 32;
+          const titleLineHeight = 40;
           const tableTop = topPadding + titleLineHeight + 26;
           const width = tableWidth + horizontalPadding * 2;
           const height = tableTop + tableHeight + bottomPadding;
@@ -1624,7 +1646,7 @@
           ];
           const draw = (markup) => parts.push(markup);
 
-          document.querySelectorAll(".timeline-section").forEach((section) => {
+          sourceTimeline.querySelectorAll(".timeline-section").forEach((section) => {
             const sectionRect = relativeRect(section, timelineRect);
             const heading = section.querySelector(".week-heading");
             const headingRect = relativeRect(heading, timelineRect);
@@ -1641,11 +1663,10 @@
               );
               const label = cell.querySelector(".week-label");
               if (!label) return;
-              const labelRect = relativeRect(label, timelineRect);
               const labelStyle = getComputedStyle(label);
-              const labelFontSize = Math.max(14, stylePixels(labelStyle.fontSize, 13) + 1);
+              const labelFontSize = 16;
               draw(
-                `<text x="${horizontalPadding + labelRect.x + labelRect.width / 2}" y="${tableTop + labelRect.y + labelFontSize}" fill="${svgEscape(labelStyle.color)}" font-family="${svgEscape(labelStyle.fontFamily)}" font-size="${labelFontSize}" font-weight="600" text-anchor="middle">${svgEscape(label.textContent)}</text>`
+                `<text x="${horizontalPadding + cellRect.x + cellRect.width / 2}" y="${tableTop + cellRect.y + cellRect.height / 2}" dominant-baseline="central" fill="${svgEscape(labelStyle.color)}" font-family="${svgEscape(labelStyle.fontFamily)}" font-size="${labelFontSize}" font-weight="600" text-anchor="middle">${svgEscape(label.textContent)}</text>`
               );
             });
 
@@ -1667,17 +1688,9 @@
               const barStyle = getComputedStyle(bar);
               const title = bar.querySelector(".task-title");
               const titleStyle = getComputedStyle(title);
-              const paddingLeft = Math.max(11, stylePixels(barStyle.paddingLeft, 13) - 2);
-              const paddingRight = Math.max(7, stylePixels(barStyle.paddingRight, 9) - 2);
-              const paddingTop = Math.max(3, stylePixels(barStyle.paddingTop, 6) - 3);
-              const paddingBottom = Math.max(3, stylePixels(barStyle.paddingBottom, 6) - 3);
-              const fontSize = Math.max(14, stylePixels(titleStyle.fontSize, 12) + 2);
-              const lineHeight = fontSize * 1.15;
-              const fontWeight = "500";
-              const font = `${fontWeight} ${fontSize}px ${titleStyle.fontFamily}`;
-              const lines = wrapSvgText(title.textContent, Math.max(20, barRect.width - paddingLeft - paddingRight), font);
-              const maxLines = Math.max(1, Math.floor((barRect.height - paddingTop - paddingBottom + 2) / lineHeight));
-              const visibleLines = lines.slice(0, maxLines);
+              const paddingLeft = stylePixels(barStyle.paddingLeft, 20);
+              const lines = title.textContent.split("\n");
+              const textTop = tableTop + barRect.y + (barRect.height - lines.length * lineHeight) / 2;
               const radius = bar.classList.contains("continuation-from-previous") || bar.classList.contains("continuation-to-next") ? 0 : 5;
               draw(
                 `<rect x="${horizontalPadding + barRect.x}" y="${tableTop + barRect.y}" width="${barRect.width}" height="${barRect.height}" rx="${radius}" fill="${svgEscape(barStyle.backgroundColor)}"/>`
@@ -1688,10 +1701,10 @@
                   `<rect x="${horizontalPadding + barRect.x + 8}" y="${markerTop}" width="3" height="${Math.max(3, barRect.height - 14)}" rx="2" fill="${svgEscape(barStyle.color)}" opacity="${bar.classList.contains("is-continuation") ? ".42" : ".95"}"/>`
                 );
               }
-              visibleLines.forEach((line, lineIndex) => {
-                const y = tableTop + barRect.y + paddingTop + fontSize * .86 + lineIndex * lineHeight;
+              lines.forEach((line, lineIndex) => {
+                const y = textTop + lineHeight / 2 + lineIndex * lineHeight;
                 draw(
-                  `<text x="${horizontalPadding + barRect.x + paddingLeft}" y="${y}" fill="${svgEscape(titleStyle.color)}" font-family="${svgEscape(titleStyle.fontFamily)}" font-size="${fontSize}" font-weight="${fontWeight}">${svgEscape(line)}</text>`
+                  `<text x="${horizontalPadding + barRect.x + paddingLeft}" y="${y}" dominant-baseline="central" fill="${svgEscape(titleStyle.color)}" font-family="${svgEscape(titleStyle.fontFamily)}" font-size="${fontSize}" font-weight="${fontWeight}">${svgEscape(line)}</text>`
                 );
               });
             });
@@ -1700,7 +1713,7 @@
           parts.push("</svg>");
           return { width, height, svg: parts.join("") };
         } finally {
-          sourceScroll.scrollLeft = previousScroll;
+          sourceTimeline.remove();
         }
       }
 
