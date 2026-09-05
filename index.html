@@ -1643,8 +1643,9 @@
               if (!label) return;
               const labelRect = relativeRect(label, timelineRect);
               const labelStyle = getComputedStyle(label);
+              const labelFontSize = Math.max(14, stylePixels(labelStyle.fontSize, 13) + 1);
               draw(
-                `<text x="${horizontalPadding + labelRect.x + labelRect.width / 2}" y="${tableTop + labelRect.y + stylePixels(labelStyle.fontSize, 13)}" fill="${svgEscape(labelStyle.color)}" font-family="${svgEscape(labelStyle.fontFamily)}" font-size="${stylePixels(labelStyle.fontSize, 13)}" font-weight="${svgEscape(labelStyle.fontWeight)}" text-anchor="middle">${svgEscape(label.textContent)}</text>`
+                `<text x="${horizontalPadding + labelRect.x + labelRect.width / 2}" y="${tableTop + labelRect.y + labelFontSize}" fill="${svgEscape(labelStyle.color)}" font-family="${svgEscape(labelStyle.fontFamily)}" font-size="${labelFontSize}" font-weight="600" text-anchor="middle">${svgEscape(label.textContent)}</text>`
               );
             });
 
@@ -1666,13 +1667,14 @@
               const barStyle = getComputedStyle(bar);
               const title = bar.querySelector(".task-title");
               const titleStyle = getComputedStyle(title);
-              const paddingLeft = stylePixels(barStyle.paddingLeft, 13);
-              const paddingRight = stylePixels(barStyle.paddingRight, 9);
-              const paddingTop = stylePixels(barStyle.paddingTop, 6);
-              const paddingBottom = stylePixels(barStyle.paddingBottom, 6);
-              const fontSize = stylePixels(titleStyle.fontSize, 12);
-              const lineHeight = stylePixels(titleStyle.lineHeight, fontSize * 1.3);
-              const font = `${titleStyle.fontWeight} ${fontSize}px ${titleStyle.fontFamily}`;
+              const paddingLeft = Math.max(11, stylePixels(barStyle.paddingLeft, 13) - 2);
+              const paddingRight = Math.max(7, stylePixels(barStyle.paddingRight, 9) - 2);
+              const paddingTop = Math.max(3, stylePixels(barStyle.paddingTop, 6) - 3);
+              const paddingBottom = Math.max(3, stylePixels(barStyle.paddingBottom, 6) - 3);
+              const fontSize = Math.max(14, stylePixels(titleStyle.fontSize, 12) + 2);
+              const lineHeight = fontSize * 1.15;
+              const fontWeight = "500";
+              const font = `${fontWeight} ${fontSize}px ${titleStyle.fontFamily}`;
               const lines = wrapSvgText(title.textContent, Math.max(20, barRect.width - paddingLeft - paddingRight), font);
               const maxLines = Math.max(1, Math.floor((barRect.height - paddingTop - paddingBottom + 2) / lineHeight));
               const visibleLines = lines.slice(0, maxLines);
@@ -1689,7 +1691,7 @@
               visibleLines.forEach((line, lineIndex) => {
                 const y = tableTop + barRect.y + paddingTop + fontSize * .86 + lineIndex * lineHeight;
                 draw(
-                  `<text x="${horizontalPadding + barRect.x + paddingLeft}" y="${y}" fill="${svgEscape(titleStyle.color)}" font-family="${svgEscape(titleStyle.fontFamily)}" font-size="${fontSize}" font-weight="${svgEscape(titleStyle.fontWeight)}">${svgEscape(line)}</text>`
+                  `<text x="${horizontalPadding + barRect.x + paddingLeft}" y="${y}" fill="${svgEscape(titleStyle.color)}" font-family="${svgEscape(titleStyle.fontFamily)}" font-size="${fontSize}" font-weight="${fontWeight}">${svgEscape(line)}</text>`
                 );
               });
             });
