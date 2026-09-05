@@ -393,7 +393,7 @@
       border: 0;
       background: rgba(255, 255, 255, .16);
       cursor: ew-resize;
-      opacity: .9;
+      opacity: 0;
       touch-action: none;
       -webkit-user-select: none;
       user-select: none;
@@ -428,6 +428,10 @@
     }
 
     .task-bar.is-continuation::before { opacity: .42; }
+
+    .task-bar:hover::before,
+    .task-bar:focus-visible::before,
+    .task-bar.is-dragging::before { opacity: 0; }
 
     .task-bar.continuation-from-previous::before { display: none; }
 
