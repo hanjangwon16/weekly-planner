@@ -242,7 +242,7 @@
 
     .timeline-section:last-child { border-bottom: 0; }
 
-    .timeline-section + .timeline-section { margin-top: 12px; }
+    .timeline-section + .timeline-section { margin-top: 8px; }
 
     .week-heading,
     .section-body {
@@ -251,9 +251,9 @@
     }
 
     .week-heading {
-      min-height: 64px;
+      min-height: 48px;
       border-bottom: 1px solid var(--line);
-      background: #374957;
+      background: #dce5eb;
     }
 
     .week-cell,
@@ -265,7 +265,7 @@
       min-width: 0;
       padding: 7px 8px;
       border-right: 1px solid var(--line);
-      color: #fff;
+      color: #3e505d;
       text-align: center;
       font-size: 13px;
       font-weight: 800;
@@ -276,9 +276,9 @@
 
     .week-cell { padding-right: 34px; }
 
-    .week-label { display: grid; gap: 4px; }
-    .week-number { font-size: 20px; font-weight: 800; }
-    .week-dates { font-size: 12px; font-weight: 500; color: #e0e7ed; }
+    .week-label { display: grid; gap: 2px; }
+    .week-number { font-size: 16px; font-weight: 600; }
+    .week-dates { font-size: 11px; font-weight: 400; color: #586b78; }
 
     .week-cell:last-child,
     .week-spacer:last-child { border-right: 0; }
@@ -1682,10 +1682,10 @@
               const labelX = horizontalPadding + cellRect.x + cellRect.width / 2;
               const labelY = tableTop + cellRect.y + cellRect.height / 2;
               draw(
-                `<text x="${labelX}" y="${labelY - 9}" dominant-baseline="central" fill="${svgEscape(numberStyle.color)}" font-family="${svgEscape(numberStyle.fontFamily)}" font-size="20" font-weight="800" text-anchor="middle">${svgEscape(number.textContent)}</text>`
+                `<text x="${labelX}" y="${labelY - 7}" dominant-baseline="central" fill="${svgEscape(numberStyle.color)}" font-family="${svgEscape(numberStyle.fontFamily)}" font-size="${stylePixels(numberStyle.fontSize, 16)}" font-weight="${svgEscape(numberStyle.fontWeight)}" text-anchor="middle">${svgEscape(number.textContent)}</text>`
               );
               draw(
-                `<text x="${labelX}" y="${labelY + 13}" dominant-baseline="central" fill="${svgEscape(dateStyle.color)}" font-family="${svgEscape(dateStyle.fontFamily)}" font-size="12" font-weight="500" text-anchor="middle">${svgEscape(dates.textContent)}</text>`
+                `<text x="${labelX}" y="${labelY + 10}" dominant-baseline="central" fill="${svgEscape(dateStyle.color)}" font-family="${svgEscape(dateStyle.fontFamily)}" font-size="${stylePixels(dateStyle.fontSize, 11)}" font-weight="${svgEscape(dateStyle.fontWeight)}" text-anchor="middle">${svgEscape(dates.textContent)}</text>`
               );
             });
 
