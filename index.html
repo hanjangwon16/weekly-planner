@@ -1622,7 +1622,7 @@
             const title = bar.querySelector(".task-title");
             Object.assign(title.style, {
               fontSize: "inherit", fontWeight: "inherit", lineHeight: "inherit",
-              color: "#3f4146", whiteSpace: "pre"
+              color: bar.classList.contains("is-continuation") ? "" : "#3f4146", whiteSpace: "pre"
             });
             const font = `${fontWeight} ${fontSize}px ${getComputedStyle(title).fontFamily}`;
             title.textContent = wrapSvgText(title.textContent, bar.getBoundingClientRect().width - 32, font).join("\n");
@@ -1691,7 +1691,7 @@
               const paddingLeft = stylePixels(barStyle.paddingLeft, 20);
               const lines = title.textContent.split("\n");
               const textTop = tableTop + barRect.y + (barRect.height - lines.length * lineHeight) / 2;
-              const radius = bar.classList.contains("continuation-from-previous") || bar.classList.contains("continuation-to-next") ? 0 : 5;
+              const radius = 5;
               draw(
                 `<rect x="${horizontalPadding + barRect.x}" y="${tableTop + barRect.y}" width="${barRect.width}" height="${barRect.height}" rx="${radius}" fill="${svgEscape(barStyle.backgroundColor)}"/>`
               );
