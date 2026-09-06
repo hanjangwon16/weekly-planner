@@ -242,6 +242,8 @@
 
     .timeline-section:last-child { border-bottom: 0; }
 
+    .timeline-section + .timeline-section { margin-top: 12px; }
+
     .week-heading,
     .section-body {
       display: grid;
@@ -249,9 +251,9 @@
     }
 
     .week-heading {
-      min-height: 38px;
+      min-height: 64px;
       border-bottom: 1px solid var(--line);
-      background: var(--header);
+      background: #374957;
     }
 
     .week-cell,
@@ -263,7 +265,7 @@
       min-width: 0;
       padding: 7px 8px;
       border-right: 1px solid var(--line);
-      color: #414247;
+      color: #fff;
       text-align: center;
       font-size: 13px;
       font-weight: 800;
@@ -273,6 +275,10 @@
     }
 
     .week-cell { padding-right: 34px; }
+
+    .week-label { display: grid; gap: 4px; }
+    .week-number { font-size: 20px; font-weight: 800; }
+    .week-dates { font-size: 12px; font-weight: 500; color: #e0e7ed; }
 
     .week-cell:last-child,
     .week-spacer:last-child { border-right: 0; }
@@ -1384,7 +1390,13 @@
             cell.className = "week-cell";
             const label = document.createElement("span");
             label.className = "week-label";
-            label.textContent = getWeekDef(week).label;
+            const number = document.createElement("span");
+            number.className = "week-number";
+            number.textContent = `${week}주`;
+            const dates = document.createElement("span");
+            dates.className = "week-dates";
+            dates.textContent = getWeekDef(week).date;
+            label.append(number, dates);
             const addButton = document.createElement("button");
             addButton.type = "button";
             addButton.className = "week-add";
@@ -1597,8 +1609,8 @@
       }
 
       async function buildExportSvg() {
-        if (document.fonts && document.fonts.ready) await document.fonts.ready;
         const sourceTimeline = document.querySelector(".timeline").cloneNode(true);
+        if (document.fonts && document.fonts.ready) await document.fonts.ready;
         sourceTimeline.removeAttribute("id");
         sourceTimeline.setAttribute("aria-hidden", "true");
         sourceTimeline.inert = true;
@@ -1663,10 +1675,17 @@
               );
               const label = cell.querySelector(".week-label");
               if (!label) return;
-              const labelStyle = getComputedStyle(label);
-              const labelFontSize = 16;
+              const number = label.querySelector(".week-number");
+              const dates = label.querySelector(".week-dates");
+              const numberStyle = getComputedStyle(number);
+              const dateStyle = getComputedStyle(dates);
+              const labelX = horizontalPadding + cellRect.x + cellRect.width / 2;
+              const labelY = tableTop + cellRect.y + cellRect.height / 2;
               draw(
-                `<text x="${horizontalPadding + cellRect.x + cellRect.width / 2}" y="${tableTop + cellRect.y + cellRect.height / 2}" dominant-baseline="central" fill="${svgEscape(labelStyle.color)}" font-family="${svgEscape(labelStyle.fontFamily)}" font-size="${labelFontSize}" font-weight="600" text-anchor="middle">${svgEscape(label.textContent)}</text>`
+                `<text x="${labelX}" y="${labelY - 9}" dominant-baseline="central" fill="${svgEscape(numberStyle.color)}" font-family="${svgEscape(numberStyle.fontFamily)}" font-size="20" font-weight="800" text-anchor="middle">${svgEscape(number.textContent)}</text>`
+              );
+              draw(
+                `<text x="${labelX}" y="${labelY + 13}" dominant-baseline="central" fill="${svgEscape(dateStyle.color)}" font-family="${svgEscape(dateStyle.fontFamily)}" font-size="12" font-weight="500" text-anchor="middle">${svgEscape(dates.textContent)}</text>`
               );
             });
 
