@@ -231,7 +231,7 @@
 
     .timeline {
       min-width: 980px;
-      background: #fff;
+      background: var(--canvas);
     }
 
     .timeline-section {
@@ -253,7 +253,7 @@
     .week-heading {
       min-height: 48px;
       border-bottom: 1px solid var(--line);
-      background: #dce5eb;
+      background: var(--header);
     }
 
     .week-cell,
@@ -265,7 +265,7 @@
       min-width: 0;
       padding: 7px 8px;
       border-right: 1px solid var(--line);
-      color: #3e505d;
+      color: #414247;
       text-align: center;
       font-size: 13px;
       font-weight: 800;
@@ -274,18 +274,18 @@
       white-space: nowrap;
     }
 
-    .week-cell { padding-right: 34px; }
+    .week-cell { padding-inline: 34px; }
 
     .week-label { display: grid; gap: 2px; }
     .week-number { font-size: 16px; font-weight: 600; }
-    .week-dates { font-size: 11px; font-weight: 400; color: #586b78; }
+    .week-dates { font-size: 11px; font-weight: 400; color: var(--muted); }
 
     .week-cell:last-child,
     .week-spacer:last-child { border-right: 0; }
 
     .week-add {
       position: absolute;
-      top: 6px;
+      top: 50%;
       right: 7px;
       display: grid;
       width: 22px;
@@ -300,6 +300,7 @@
       font-weight: 500;
       line-height: 1;
       opacity: .72;
+      transform: translateY(-50%);
       transition: background .18s ease, border-color .18s ease, color .18s ease, opacity .18s ease, transform .18s ease;
     }
 
@@ -310,7 +311,7 @@
       background: #3d4047;
       color: #fff;
       opacity: 1;
-      transform: scale(1.04);
+      transform: translateY(-50%) scale(1.04);
     }
 
     .section-body {
